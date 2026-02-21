@@ -13,25 +13,41 @@ if (localStorage.getItem('oceanview_logged_in') === 'true') {
     showMainApp();
 }
 
-loginForm.addEventListener('submit', (e) => {
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    if (username === 'admin' && password === 'admin123') {
-        localStorage.setItem('oceanview_logged_in', 'true');
-        localStorage.setItem('oceanview_username', username);
-        showMainApp();
-    } else {
-        loginError.textContent = 'Invalid username or password';
+    try {
+        const response = await fetch('http://localhost:8081/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            localStorage.setItem('oceanview_logged_in', 'true');
+            localStorage.setItem('oceanview_username', data.username);
+            localStorage.setItem('oceanview_role', data.role);
+            showMainApp();
+        } else {
+            loginError.textContent = data.message || 'Invalid username or password';
+            loginError.style.display = 'block';
+            document.getElementById('password').value = '';
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        loginError.textContent = 'Server connection failed';
         loginError.style.display = 'block';
-        document.getElementById('password').value = '';
     }
 });
 
 logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('oceanview_logged_in');
     localStorage.removeItem('oceanview_username');
+    localStorage.removeItem('oceanview_role');
     loginScreen.style.display = 'flex';
     mainApp.style.display = 'none';
     document.getElementById('username').value = '';
@@ -42,8 +58,16 @@ logoutBtn.addEventListener('click', () => {
 function showMainApp() {
     loginScreen.style.display = 'none';
     mainApp.style.display = 'flex';
-    const username = localStorage.getItem('oceanview_username') || 'Administrator';
-    usernameDisplay.textContent = username;
+    const username = localStorage.getItem('oceanview_username') || 'User';
+    const role = localStorage.getItem('oceanview_role') || 'STAFF';
+    usernameDisplay.textContent = `${username} (${role})`;
+
+    // Role-based visibility
+    const adminElements = document.querySelectorAll('.admin-only');
+    adminElements.forEach(el => {
+        el.style.display = (role === 'ADMIN') ? '' : 'none';
+    });
+
     fetchData();
 }
 
@@ -53,29 +77,38 @@ const pages = {
     dashboard: document.getElementById('dashboardPage'),
     add: document.getElementById('addPage'),
     list: document.getElementById('listPage'),
-    billing: document.getElementById('billingPage')
+    billing: document.getElementById('billingPage'),
+    staff: document.getElementById('staffPage'),
+    reports: document.getElementById('reportsPage')
 };
 const pageTitle = document.getElementById('pageTitle');
 
 navItems.forEach(item => {
     item.addEventListener('click', () => {
         const page = item.dataset.page;
+        const role = localStorage.getItem('oceanview_role');
+
+        // Security check for frontend navigation
+        if (item.classList.contains('admin-only') && role !== 'ADMIN') {
+            alert('Access Denied');
+            return;
+        }
 
         // Update active nav item
         navItems.forEach(nav => nav.classList.remove('active'));
         item.classList.add('active');
 
         // Show selected page
-        Object.values(pages).forEach(p => p.style.display = 'none');
-        pages[page].style.display = 'block';
+        Object.values(pages).forEach(p => { if (p) p.style.display = 'none'; });
+        if (pages[page]) pages[page].style.display = 'block';
 
         // Update title
         pageTitle.textContent = page.charAt(0).toUpperCase() + page.slice(1);
 
-        // Fetch data for list page
-        if (page === 'list') {
-            fetchReservations();
-        }
+        // Fetch specialized data
+        if (page === 'list') fetchReservations();
+        if (page === 'staff') fetchStaffList();
+        if (page === 'reports') fetchReportData();
     });
 });
 
@@ -214,6 +247,75 @@ reservationForm.addEventListener('submit', async (e) => {
     }
 });
 
+// Staff Management
+async function fetchStaffList() {
+    const role = localStorage.getItem('oceanview_role');
+    try {
+        const response = await fetch('http://localhost:8081/api/users', {
+            headers: { 'X-Role': role }
+        });
+        if (response.ok) {
+            const users = await response.json();
+            renderStaffTable(users);
+        }
+    } catch (e) { console.error('Error fetching staff:', e); }
+}
+
+function renderStaffTable(users) {
+    const tbody = document.getElementById('staffTableBody');
+    tbody.innerHTML = '';
+    users.forEach(u => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${u.username}</td>
+            <td><span class="badge ${u.role === 'ADMIN' ? 'admin' : 'staff'}">${u.role}</span></td>
+            <td>
+                ${u.username !== 'admin' ? `<button class="btn-delete" onclick="deleteUser('${u.username}')">Delete</button>` : 'System User'}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+document.getElementById('staffForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('newStaffUsername').value;
+    const password = document.getElementById('newStaffPassword').value;
+    const role = document.getElementById('newStaffRole').value;
+    const adminRole = localStorage.getItem('oceanview_role');
+
+    try {
+        const response = await fetch('http://localhost:8081/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Role': adminRole
+            },
+            body: JSON.stringify({ username, password, role })
+        });
+        if (response.ok) {
+            alert('Staff account created!');
+            document.getElementById('staffForm').reset();
+            fetchStaffList();
+        } else {
+            const err = await response.json();
+            alert(err.message);
+        }
+    } catch (e) { alert('Failed to create account'); }
+});
+
+async function deleteUser(username) {
+    if (!confirm(`Are you sure you want to delete ${username}?`)) return;
+    const role = localStorage.getItem('oceanview_role');
+    try {
+        const response = await fetch(`http://localhost:8081/api/users?username=${username}`, {
+            method: 'DELETE',
+            headers: { 'X-Role': role }
+        });
+        if (response.ok) fetchStaffList();
+    } catch (e) { alert('Delete failed'); }
+}
+
 // Billing
 const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
 const searchRefIdInput = document.getElementById('searchRefId');
@@ -222,15 +324,12 @@ const invoiceDetails = document.getElementById('invoiceDetails');
 
 generateInvoiceBtn.addEventListener('click', async () => {
     const refId = searchRefIdInput.value.trim();
-
     if (!refId) {
         alert('Please enter a reference ID');
         return;
     }
-
     try {
         const response = await fetch(`${API_BASE}/${refId}`);
-
         if (response.ok) {
             const bill = await response.json();
             displayInvoice(bill);
@@ -265,4 +364,20 @@ function displayInvoice(bill) {
 
     invoiceDetails.parentElement.insertBefore(totalDiv, invoiceDetails.nextSibling);
     invoiceContainer.style.display = 'block';
+}
+
+// Financial Reports
+async function fetchReportData() {
+    const role = localStorage.getItem('oceanview_role');
+    try {
+        const response = await fetch(`${API_BASE}/stats`, {
+            headers: { 'X-Role': role }
+        });
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('reportRevenue').textContent = `LKR ${stats.totalRevenue.toLocaleString()}`;
+            document.getElementById('reportBookings').textContent = stats.totalBookings;
+            document.getElementById('reportOccupancy').textContent = stats.occupancyRate;
+        }
+    } catch (e) { console.error('Error fetching report:', e); }
 }

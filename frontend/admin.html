@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ocean View Resort - Management System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon">🔒</div>
+        <h1>OCEAN VIEW</h1>
+        <p>Resort Management System</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Enter username" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+        <div id="loginError" class="error-message" style="display: none;"></div>
+        <button type="submit" class="btn-primary">LOGIN</button>
+      </form>
+      <div class="demo-credentials">
+        Demo credentials: <strong>admin / admin123</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="mainApp" class="app-container" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo"></div>
+        <h1>OCEAN VIEW</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <span class="icon">📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="add">
+          <span class="icon">➕</span>
+          <span>Add Reservation</span>
+        </button>
+        <button class="nav-item" data-page="list">
+          <span class="icon">📋</span>
+          <span>View All</span>
+        </button>
+        <button class="nav-item" data-page="billing">
+          <span class="icon">💳</span>
+          <span>Billing</span>
+        </button>
+        <button class="nav-item admin-only" data-page="staff" style="display: none;">
+          <span class="icon">👥</span>
+          <span>Staff Management</span>
+        </button>
+        <button class="nav-item admin-only" data-page="reports" style="display: none;">
+          <span class="icon">📈</span>
+          <span>Financial Reports</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" id="logoutBtn">
+          <span class="icon">🚪</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="content-header">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p>Welcome back to the management portal.</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <span id="usernameDisplay">Administrator</span>
+        </div>
+      </header>
+
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Bookings</span>
+            <div class="stat-value" id="totalBookings">0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Revenue</span>
+            <div class="stat-value" id="totalRevenue">LKR 0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Occupancy</span>
+            <div class="stat-value" id="occupancyRate">0%</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Active Guests</span>
+            <div class="stat-value">28</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Reservation Page -->
+      <div id="addPage" class="page-content" style="display: none;">
+        <div class="form-container">
+          <form id="reservationForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Guest Name</label>
+                <input type="text" id="guestName" required>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="phone" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" id="address">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Room Type</label>
+                <select id="roomType">
+                  <option value="STANDARD">Standard (LKR 15,000)</option>
+                  <option value="DELUXE">Deluxe (LKR 25,000)</option>
+                  <option value="SUITE">Suite (LKR 45,000)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Board Type</label>
+                <select id="boardType">
+                  <option value="BB">Bed & Breakfast (Free)</option>
+                  <option value="HB">Half Board (+5,000)</option>
+                  <option value="FB">Full Board (+10,000)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Check In</label>
+                <input type="date" id="checkInDate" required>
+              </div>
+              <div class="form-group">
+                <label>Check Out</label>
+                <input type="date" id="checkOutDate" required>
+              </div>
+            </div>
+            <div id="estimateBox" class="estimate-box" style="display: none;">
+              <span>Estimated Total Price:</span>
+              <span id="estimateAmount" class="estimate-amount">LKR 0</span>
+            </div>
+            <button type="submit" class="btn-primary">CONFIRM RESERVATION</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- List Page -->
+      <div id="listPage" class="page-content" style="display: none;">
+        <div class="table-container">
+          <table id="reservationsTable">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Guest</th>
+                <th>Plan</th>
+                <th>Stay Dates</th>
+                <th>Total Bill</th>
+              </tr>
+            </thead>
+            <tbody id="reservationsBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Billing Page -->
+      <div id="billingPage" class="page-content" style="display: none;">
+        <div class="billing-grid">
+          <div class="billing-search">
+            <h3>Billing Search</h3>
+            <div class="form-group">
+              <label>Enter Reference ID</label>
+              <input type="text" id="searchRefId" placeholder="e.g. 1001">
+            </div>
+            <button class="btn-secondary" id="generateInvoiceBtn">GENERATE INVOICE</button>
+          </div>
+          <div id="invoiceContainer" style="display: none;">
+            <div class="invoice">
+              <div class="invoice-header">
+                <h1>OCEAN VIEW RESORT</h1>
+                <p>Official Invoice</p>
+              </div>
+              <div class="invoice-details" id="invoiceDetails">
+                <!-- Populated by JavaScript -->
+              </div>
+              <button class="btn-print" onclick="window.print()">Print Hard Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Management Page (Admin Only) -->
+      <div id="staffPage" class="page-content admin-only" style="display: none;">
+        <div class="form-container" style="margin-bottom: 30px;">
+          <h3>Add New Staff Member</h3>
+          <form id="staffForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="newStaffUsername" required>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="newStaffPassword" required>
+              </div>
+              <div class="form-group">
+                <label>Role</label>
+                <select id="newStaffRole">
+                  <option value="STAFF">Staff</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">CREATE ACCOUNT</button>
+          </form>
+        </div>
+        <div class="table-container">
+          <h3>Active Staff List</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reports Page (Admin Only) -->
+      <div id="reportsPage" class="page-content admin-only" style="display: none;">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Revenue</span>
+            <div class="stat-value" id="reportRevenue" style="color: #059669;">LKR 0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total Bookings</span>
+            <div class="stat-value" id="reportBookings">0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Projected Occupancy</span>
+            <div class="stat-value" id="reportOccupancy">0%</div>
+          </div>
+        </div>
+        <div style="margin-top: 40px; text-align: center; color: #64748b;">
+          <p>Note: Admin reports provide real-time financial tracking.</p>
+          <button class="btn-secondary" onclick="window.print()" style="margin-top: 20px;">Export Report</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

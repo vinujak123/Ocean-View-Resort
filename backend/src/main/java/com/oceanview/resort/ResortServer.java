@@ -1,8 +1,11 @@
 package com.oceanview.resort;
 
 import com.oceanview.resort.handler.ReservationHandler;
+import com.oceanview.resort.handler.AuthHandler;
+import com.oceanview.resort.handler.UserHandler;
 import com.oceanview.resort.handler.SwaggerHandler;
 import com.oceanview.resort.repository.FileBasedReservationRepository;
+import com.oceanview.resort.repository.UserRepository;
 import com.oceanview.resort.service.ReservationService;
 import com.sun.net.httpserver.HttpServer;
 
@@ -21,8 +24,9 @@ public class ResortServer {
 
     public static void main(String[] args) {
         try {
-            // Initialize repository and service
+            // Initialize repositories and services
             FileBasedReservationRepository repository = new FileBasedReservationRepository();
+            UserRepository userRepository = new UserRepository();
             ReservationService service = new ReservationService(repository);
 
             // Create HTTP server
@@ -30,6 +34,8 @@ public class ResortServer {
 
             // Register handlers
             server.createContext("/api/reservations", new ReservationHandler(service));
+            server.createContext("/api/auth", new AuthHandler(userRepository));
+            server.createContext("/api/users", new UserHandler(userRepository));
             server.createContext("/swagger-ui", new SwaggerHandler());
             server.createContext("/api-docs", new SwaggerHandler());
 
