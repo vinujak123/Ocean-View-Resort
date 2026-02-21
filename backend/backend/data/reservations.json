@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "referenceId": "1001",
+    "guestName": "John Doe",
+    "address": "123 Main St",
+    "phone": "1234567890",
+    "roomType": "DELUXE",
+    "boardType": "FB",
+    "checkInDate": "2026-03-01",
+    "checkOutDate": "2026-03-05",
+    "totalBill": 140000.0
+  },
+  {
+    "id": 2,
+    "referenceId": "1002",
+    "guestName": "ygyu",
+    "address": "ygtyg",
+    "phone": "054684684",
+    "roomType": "STANDARD",
+    "boardType": "BB",
+    "checkInDate": "2026-02-05",
+    "checkOutDate": "2026-02-19",
+    "totalBill": 210000.0
+  }
+]
