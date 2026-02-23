@@ -1,7 +1,6 @@
 package com.oceanview.resort.handler;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.oceanview.resort.model.User;
 import com.oceanview.resort.repository.UserRepository;
 import com.sun.net.httpserver.HttpExchange;

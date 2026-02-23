@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class FileBasedReservationRepository {
 
-    private static final String DATA_FILE = "backend/data/reservations.json";
+    private static final String DATA_FILE = "data/reservations.json";
     private final Path dataPath;
     private final AtomicLong idCounter;
 

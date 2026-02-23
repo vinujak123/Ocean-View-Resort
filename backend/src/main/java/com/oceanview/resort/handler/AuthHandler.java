@@ -32,6 +32,7 @@ public class AuthHandler implements HttpHandler {
         }
 
         if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            System.out.println("Handling login request...");
             handleLogin(exchange);
         } else {
             exchange.sendResponseHeaders(405, -1);
@@ -39,27 +40,59 @@ public class AuthHandler implements HttpHandler {
     }
 
     private void handleLogin(HttpExchange exchange) throws IOException {
-        InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-        JsonObject loginData = gson.fromJson(isr, JsonObject.class);
+        try {
+            // Read body as string
+            StringBuilder bodyBuilder = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    bodyBuilder.append(line);
+                }
+            }
+            String body = bodyBuilder.toString();
+            System.out.println("Request body: " + body);
 
-        String username = loginData.get("username").getAsString();
-        String password = loginData.get("password").getAsString();
+            if (body.isEmpty()) {
+                System.out.println("Empty request body!");
+                sendResponse(exchange, 400, "{\"success\": false, \"message\": \"Empty request\"}");
+                return;
+            }
 
-        Optional<User> userOpt = userRepository.findByUsername(username);
+            JsonObject loginData = gson.fromJson(body, JsonObject.class);
 
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
-            User user = userOpt.get();
-            JsonObject response = new JsonObject();
-            response.addProperty("username", user.getUsername());
-            response.addProperty("role", user.getRole());
-            response.addProperty("success", true);
+            if (loginData == null) {
+                System.out.println("Login data is null!");
+                sendResponse(exchange, 400, "{\"success\": false, \"message\": \"Invalid JSON\"}");
+                return;
+            }
 
-            sendResponse(exchange, 200, response.toString());
-        } else {
-            JsonObject response = new JsonObject();
-            response.addProperty("success", false);
-            response.addProperty("message", "Invalid credentials");
-            sendResponse(exchange, 401, response.toString());
+            String username = loginData.get("username").getAsString();
+            String password = loginData.get("password").getAsString();
+            System.out.println("Login attempt for: " + username);
+
+            Optional<User> userOpt = userRepository.findByUsername(username);
+
+            if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
+                System.out.println("Login successful for " + username);
+                User user = userOpt.get();
+                JsonObject response = new JsonObject();
+                response.addProperty("username", user.getUsername());
+                response.addProperty("role", user.getRole());
+                response.addProperty("success", true);
+
+                sendResponse(exchange, 200, response.toString());
+            } else {
+                System.out.println("Login failed for " + username);
+                JsonObject response = new JsonObject();
+                response.addProperty("success", false);
+                response.addProperty("message", "Invalid credentials");
+                sendResponse(exchange, 401, response.toString());
+            }
+        } catch (Exception e) {
+            System.err.println("Error in handleLogin: " + e.getMessage());
+            e.printStackTrace();
+            sendResponse(exchange, 500, "{\"success\": false, \"message\": \"Internal error\"}");
         }
     }
 
