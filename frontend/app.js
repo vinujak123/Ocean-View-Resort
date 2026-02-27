@@ -8,10 +8,7 @@ const loginError = document.getElementById('loginError');
 const logoutBtn = document.getElementById('logoutBtn');
 const usernameDisplay = document.getElementById('usernameDisplay');
 
-// Check if already logged in
-if (localStorage.getItem('oceanview_logged_in') === 'true') {
-    showMainApp();
-}
+// Initial check for login state will be at the bottom of the script
 
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -62,11 +59,15 @@ function showMainApp() {
     const role = localStorage.getItem('oceanview_role') || 'STAFF';
     usernameDisplay.textContent = `${username} (${role})`;
 
-    // Role-based visibility
-    const adminElements = document.querySelectorAll('.admin-only');
-    adminElements.forEach(el => {
-        el.style.display = (role === 'ADMIN') ? '' : 'none';
+    // Role-based visibility (only for nav items)
+    const adminNavs = document.querySelectorAll('.nav-item.admin-only');
+    adminNavs.forEach(el => {
+        el.style.display = (role === 'ADMIN') ? 'flex' : 'none';
     });
+
+    // Default to dashboard
+    Object.values(pages).forEach(p => { if (p) p.style.display = 'none'; });
+    if (pages.dashboard) pages.dashboard.style.display = 'block';
 
     fetchData();
 }
@@ -380,4 +381,9 @@ async function fetchReportData() {
             document.getElementById('reportOccupancy').textContent = stats.occupancyRate;
         }
     } catch (e) { console.error('Error fetching report:', e); }
+}
+
+// Initialize login state
+if (localStorage.getItem('oceanview_logged_in') === 'true') {
+    showMainApp();
 }

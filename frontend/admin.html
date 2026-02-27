@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ocean View Resort - Management System</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.1">
 </head>
 
 <body>
@@ -13,9 +13,9 @@
   <div id="loginScreen" class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <div class="logo-icon">🏝️</div>
+        <div class="logo-icon">OV</div>
         <h1>OCEAN VIEW</h1>
-        <p>Premium Resort Management</p>
+        <p>Resort Management Portal</p>
       </div>
       <form id="loginForm">
         <div class="form-group">
@@ -45,33 +45,26 @@
       </div>
       <nav class="sidebar-nav">
         <button class="nav-item active" data-page="dashboard">
-          <span class="icon">🏘️</span>
-          <span>Dashboard</span>
+          <span>Overview</span>
         </button>
         <button class="nav-item" data-page="add">
-          <span class="icon">✨</span>
           <span>New Booking</span>
         </button>
         <button class="nav-item" data-page="list">
-          <span class="icon">📜</span>
-          <span>Reservation Log</span>
+          <span>Reservations</span>
         </button>
         <button class="nav-item" data-page="billing">
-          <span class="icon">💎</span>
           <span>Payments</span>
         </button>
         <button class="nav-item admin-only" data-page="staff" style="display: none;">
-          <span class="icon">🛡️</span>
-          <span>Staff Access</span>
+          <span>Staff Management</span>
         </button>
         <button class="nav-item admin-only" data-page="reports" style="display: none;">
-          <span class="icon">📊</span>
-          <span>Analysis</span>
+          <span>Financials</span>
         </button>
       </nav>
       <div class="sidebar-footer">
         <button class="nav-item" id="logoutBtn">
-          <span class="icon">🪐</span>
           <span>Sign Out</span>
         </button>
       </div>
