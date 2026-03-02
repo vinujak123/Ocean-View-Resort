@@ -57,7 +57,9 @@ function showMainApp() {
     mainApp.style.display = 'flex';
     const username = localStorage.getItem('oceanview_username') || 'User';
     const role = localStorage.getItem('oceanview_role') || 'STAFF';
-    usernameDisplay.textContent = `${username} (${role})`;
+    usernameDisplay.textContent = username;
+    document.getElementById('avatarLetter').textContent = username.charAt(0).toUpperCase();
+    document.getElementById('pageSubtitle').textContent = `Logged in as ${role === 'ADMIN' ? 'Administrator' : 'Staff Member'}`;
 
     // Role-based visibility (only for nav items)
     const adminNavs = document.querySelectorAll('.nav-item.admin-only');
@@ -80,7 +82,8 @@ const pages = {
     list: document.getElementById('listPage'),
     billing: document.getElementById('billingPage'),
     staff: document.getElementById('staffPage'),
-    reports: document.getElementById('reportsPage')
+    reports: document.getElementById('reportsPage'),
+    help: document.getElementById('helpPage')
 };
 const pageTitle = document.getElementById('pageTitle');
 
@@ -103,14 +106,55 @@ navItems.forEach(item => {
         Object.values(pages).forEach(p => { if (p) p.style.display = 'none'; });
         if (pages[page]) pages[page].style.display = 'block';
 
-        // Update title
-        pageTitle.textContent = page.charAt(0).toUpperCase() + page.slice(1);
+        // Update title and subtitle
+        const title = page.charAt(0).toUpperCase() + page.slice(1);
+        pageTitle.textContent = title === 'Add' ? 'New Booking' : (title === 'List' ? 'Reservations' : (title === 'Billing' ? 'Payments' : title));
+
+        const subtitles = {
+            dashboard: 'Overview of resort performance and activity.',
+            add: 'Create a new guest record and room reservation.',
+            list: 'View and manage all guest reservations.',
+            billing: 'Search records and generate official invoices.',
+            staff: 'Manage system users and access levels.',
+            reports: 'Detailed financial analytics and performance data.',
+            help: 'Guidelines and documentation for system usage.'
+        };
+        document.getElementById('pageSubtitle').textContent = subtitles[page] || '';
 
         // Fetch specialized data
         if (page === 'list') fetchReservations();
         if (page === 'staff') fetchStaffList();
         if (page === 'reports') fetchReportData();
     });
+});
+
+// Exit System
+const exitBtn = document.getElementById('exitBtn');
+const exitOverlay = document.getElementById('exitOverlay');
+const cancelExit = document.getElementById('cancelExit');
+const confirmExit = document.getElementById('confirmExit');
+
+exitBtn.addEventListener('click', () => {
+    exitOverlay.style.display = 'flex';
+});
+
+cancelExit.addEventListener('click', () => {
+    exitOverlay.style.display = 'none';
+});
+
+confirmExit.addEventListener('click', () => {
+    // Graceful exit: logout and redirect or show goodbye
+    localStorage.removeItem('oceanview_logged_in');
+    localStorage.removeItem('oceanview_username');
+    localStorage.removeItem('oceanview_role');
+
+    document.body.innerHTML = `
+        <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #0f172a; color: white; flex-direction: column; font-family: 'Outfit', sans-serif;">
+            <h1 style="font-size: 3rem; margin-bottom: 1rem;">Session Ended</h1>
+            <p style="color: #94a3b8; margin-bottom: 2rem;">You have safely exited the Ocean View Resort Management System.</p>
+            <button onclick="location.reload()" style="background: white; color: #0f172a; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">Return to Login</button>
+        </div>
+    `;
 });
 
 // Fetch data

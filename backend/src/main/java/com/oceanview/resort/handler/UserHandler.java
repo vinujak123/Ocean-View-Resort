@@ -55,8 +55,12 @@ public class UserHandler implements HttpHandler {
     private void handleGetUsers(HttpExchange exchange) throws IOException {
         List<User> users = userRepository.findAll();
         // Mask passwords before sending
-        users.forEach(u -> u.setPassword("****"));
-        sendResponse(exchange, 200, gson.toJson(users));
+        users.forEach(u -> u.setRole(u.getRole())); // Dummy set to avoid empty loop if needed
+        // For security, we create a copy without passwords
+        List<User> safeUsers = users.stream()
+                .map(u -> new User(u.getUsername(), "****", u.getRole()))
+                .toList();
+        sendResponse(exchange, 200, gson.toJson(safeUsers));
     }
 
     private void handleCreateUser(HttpExchange exchange) throws IOException {
@@ -80,16 +84,9 @@ public class UserHandler implements HttpHandler {
                 sendResponse(exchange, 400, "{\"message\": \"Cannot delete default admin\"}");
                 return;
             }
-            List<User> users = userRepository.findAll();
-            boolean removed = users.removeIf(u -> u.getUsername().equals(username));
-            if (removed) {
-                // Actually save the updated list
-                // Need a way to save full list in repository
-                // I'll update UserRepository to have a delete method
-                userRepository.findAll(); // Refresh
-                // For simplicity, I'll just save it by adding a delete method to repo later if
-                // needed
-                // But let's just use the repo's internal mechanism if I update it
+
+            if (userRepository.findByUsername(username).isPresent()) {
+                userRepository.delete(username);
                 sendResponse(exchange, 200, "{\"message\": \"User deleted\"}");
             } else {
                 sendResponse(exchange, 404, "{\"message\": \"User not found\"}");

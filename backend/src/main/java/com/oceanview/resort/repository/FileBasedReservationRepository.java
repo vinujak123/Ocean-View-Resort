@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * File-based repository for Reservation persistence using JSON
  */
-public class FileBasedReservationRepository {
+public class FileBasedReservationRepository implements ReservationRepository {
 
     private static final String DATA_FILE = "data/reservations.json";
     private final Path dataPath;
@@ -48,6 +48,7 @@ public class FileBasedReservationRepository {
     /**
      * Find all reservations
      */
+    @Override
     public List<Reservation> findAll() {
         try {
             String json = Files.readString(dataPath);
@@ -63,6 +64,7 @@ public class FileBasedReservationRepository {
     /**
      * Save a reservation (create or update)
      */
+    @Override
     public synchronized Reservation save(Reservation reservation) {
         try {
             List<Reservation> reservations = findAll();
@@ -91,6 +93,7 @@ public class FileBasedReservationRepository {
     /**
      * Find reservation by reference ID
      */
+    @Override
     public Optional<Reservation> findByReferenceId(String referenceId) {
         return findAll().stream()
                 .filter(r -> r.getReferenceId().equals(referenceId))
@@ -100,6 +103,7 @@ public class FileBasedReservationRepository {
     /**
      * Find maximum reference ID for auto-increment
      */
+    @Override
     public String findMaxReferenceId() {
         return findAll().stream()
                 .map(Reservation::getReferenceId)

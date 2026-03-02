@@ -1,12 +1,9 @@
 package com.oceanview.resort;
 
-import com.oceanview.resort.handler.ReservationHandler;
-import com.oceanview.resort.handler.AuthHandler;
-import com.oceanview.resort.handler.UserHandler;
-import com.oceanview.resort.handler.SwaggerHandler;
-import com.oceanview.resort.repository.FileBasedReservationRepository;
-import com.oceanview.resort.repository.UserRepository;
+import com.oceanview.resort.handler.*;
+import com.oceanview.resort.repository.*;
 import com.oceanview.resort.service.ReservationService;
+import com.oceanview.resort.util.DatabaseUtil;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -24,23 +21,37 @@ public class ResortServer {
 
     public static void main(String[] args) {
         try {
-            // Initialize repositories and services
-            FileBasedReservationRepository repository = new FileBasedReservationRepository();
-            UserRepository userRepository = new UserRepository();
-            ReservationService service = new ReservationService(repository);
+            // Repositories
+            ReservationRepository reservationRepository;
+            UserRepository userRepository;
+
+            // Try MySQL Connection
+            System.out.println("Checking MySQL connection...");
+            if (DatabaseUtil.testConnection()) {
+                System.out.println("Using MySQL persistence.");
+                reservationRepository = new MySqlReservationRepository();
+                userRepository = new MySqlUserRepository();
+
+                // Migrate existing data if needed
+                migrateData(reservationRepository, userRepository);
+            } else {
+                System.out.println("MySQL unavailable. Falling back to File-based persistence.");
+                reservationRepository = new FileBasedReservationRepository();
+                userRepository = new FileUserRepository();
+            }
+
+            ReservationService reservationService = new ReservationService(reservationRepository);
 
             // Create HTTP server
             server = HttpServer.create(new InetSocketAddress(PORT), 0);
+            server.setExecutor(Executors.newFixedThreadPool(10));
 
             // Register handlers
-            server.createContext("/api/reservations", new ReservationHandler(service));
+            server.createContext("/api/reservations", new ReservationHandler(reservationService));
             server.createContext("/api/auth", new AuthHandler(userRepository));
             server.createContext("/api/users", new UserHandler(userRepository));
             server.createContext("/swagger-ui", new SwaggerHandler());
             server.createContext("/api-docs", new SwaggerHandler());
-
-            // Set executor for handling requests
-            server.setExecutor(Executors.newFixedThreadPool(10));
 
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -51,6 +62,10 @@ public class ResortServer {
 
             // Start server
             server.start();
+
+            // Log absolute path for data for debugging
+            System.out.println("Data Directory: " + java.nio.file.Paths.get("data").toAbsolutePath());
+
             System.out.println("╔════════════════════════════════════════════════════════════╗");
             System.out.println("║        Ocean View Resort - Reservation System             ║");
             System.out.println("╚════════════════════════════════════════════════════════════╝");
@@ -73,6 +88,26 @@ public class ResortServer {
             System.err.println("Failed to start server: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
+        }
+    }
+
+    private static void migrateData(ReservationRepository mysqlResRepo, UserRepository mysqlUserRepo) {
+        try {
+            // Check if users table is empty (ignore default users count if needed)
+            if (mysqlUserRepo.findAll().size() <= 2) {
+                System.out.println("Migrating users from file to MySQL...");
+                FileUserRepository fileUserRepo = new FileUserRepository();
+                fileUserRepo.findAll().forEach(mysqlUserRepo::save);
+            }
+
+            // Check if reservations table is empty
+            if (mysqlResRepo.findAll().isEmpty()) {
+                System.out.println("Migrating reservations from file to MySQL...");
+                FileBasedReservationRepository fileResRepo = new FileBasedReservationRepository();
+                fileResRepo.findAll().forEach(mysqlResRepo::save);
+            }
+        } catch (Exception e) {
+            System.err.println("Migration warning: " + e.getMessage());
         }
     }
 }

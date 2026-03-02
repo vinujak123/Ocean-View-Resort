@@ -1,7 +1,7 @@
 package com.oceanview.resort.service;
 
 import com.oceanview.resort.model.Reservation;
-import com.oceanview.resort.repository.FileBasedReservationRepository;
+import com.oceanview.resort.repository.ReservationRepository;
 import com.oceanview.resort.util.ValidationUtil;
 
 import java.time.temporal.ChronoUnit;
@@ -13,9 +13,9 @@ import java.util.List;
  */
 public class ReservationService {
 
-    private final FileBasedReservationRepository repository;
+    private final ReservationRepository repository;
 
-    public ReservationService(FileBasedReservationRepository repository) {
+    public ReservationService(ReservationRepository repository) {
         this.repository = repository;
     }
 

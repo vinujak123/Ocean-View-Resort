@@ -62,6 +62,12 @@
         <button class="nav-item admin-only" data-page="reports" style="display: none;">
           <span>Financials</span>
         </button>
+        <button class="nav-item" data-page="help">
+          <span>Help Center</span>
+        </button>
+        <button class="nav-item" id="exitBtn" style="margin-top: auto; color: #ef4444;">
+          <span>Exit System</span>
+        </button>
       </nav>
       <div class="sidebar-footer">
         <button class="nav-item" id="logoutBtn">
@@ -75,10 +81,10 @@
       <header class="content-header">
         <div>
           <h2 id="pageTitle">Dashboard</h2>
-          <p>Welcome back to the management portal.</p>
+          <p id="pageSubtitle">Welcome back to the management portal.</p>
         </div>
         <div class="user-info">
-          <div class="user-avatar">A</div>
+          <div class="user-avatar" id="avatarLetter">A</div>
           <span id="usernameDisplay">Administrator</span>
         </div>
       </header>
@@ -413,6 +419,67 @@
         </div>
 
       </div>
+
+      <!-- Help Page -->
+      <div id="helpPage" class="page-content" style="display: none;">
+        <div class="help-container">
+          <div class="help-section">
+            <h3 class="help-title">Getting Started</h3>
+            <p>Welcome to the Ocean View Resort Management System. This portal is designed for efficient handling of
+              room
+              reservations and guest records.</p>
+          </div>
+
+          <div class="help-grid">
+            <div class="help-card">
+              <div class="help-icon">📝</div>
+              <h4>New Bookings</h4>
+              <p>Navigate to "New Booking" to register a guest. Fill in their name, contact details, and stay dates. The
+                system
+                automatically calculates the bill based on room and board types.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">📅</div>
+              <h4>Reservations</h4>
+              <p>View all current and past bookings in the "Reservations" tab. You can see guest details, stay periods,
+                and total
+                costs at a glance.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">💳</div>
+              <h4>Payments & Invoices</h4>
+              <p>To generate a bill, go to "Payments", search by Reference ID, and click "Generate Invoice". You can
+                print a hard
+                copy directly from the browser.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">📊</div>
+              <h4>Analytics (Admins Only)</h4>
+              <p>Admins can access "Financials" for detailed revenue reports, occupancy rates, and guest spending
+                analysis.</p>
+            </div>
+          </div>
+
+          <div class="help-footer">
+            <p>Need technical assistance? Contact IT Support at <a
+                href="mailto:support@oceanview.com">support@oceanview.com</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exit Screen Overlay -->
+      <div id="exitOverlay" class="exit-overlay" style="display: none;">
+        <div class="exit-card">
+          <div class="exit-icon">👋</div>
+          <h2>System Exit</h2>
+          <p>You are about to close the management system session. Are you sure you want to proceed?</p>
+          <div class="exit-actions">
+            <button class="btn-secondary" id="cancelExit">Cancel</button>
+            <button class="btn-primary" id="confirmExit" style="background: #ef4444;">Exit System</button>
+          </div>
+        </div>
+      </div>
+
       <script src="app.js"></script>
 </body>
 
