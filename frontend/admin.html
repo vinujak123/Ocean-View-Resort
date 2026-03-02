@@ -249,30 +249,171 @@
       </div>
 
       <!-- Reports Page (Admin Only) -->
-      <div id="reportsPage" class="page-content admin-only" style="display: none;">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-label">Total Revenue</span>
-            <div class="stat-value" id="reportRevenue" style="color: #059669;">LKR 0</div>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Total Bookings</span>
-            <div class="stat-value" id="reportBookings">0</div>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Projected Occupancy</span>
-            <div class="stat-value" id="reportOccupancy">0%</div>
-          </div>
-        </div>
-        <div style="margin-top: 40px; text-align: center; color: #64748b;">
-          <p>Note: Admin reports provide real-time financial tracking.</p>
-          <button class="btn-secondary" onclick="window.print()" style="margin-top: 20px;">Export Report</button>
-        </div>
-      </div>
-    </main>
-  </div>
+      <div id="reportsPage" class="page-content admin-only rp-page" style="display: none;">
 
-  <script src="app.js"></script>
+        <!-- Report Banner -->
+        <div class="rp-banner">
+          <div class="rp-banner-left">
+            <div class="rp-banner-eyebrow">FINANCIAL ANALYTICS</div>
+            <h2 class="rp-banner-title">Revenue &amp; Performance Report</h2>
+            <p class="rp-banner-sub">Ocean View Resort &mdash; All-time summary</p>
+          </div>
+          <div class="rp-banner-right">
+            <div class="rp-banner-meta">
+              <span class="rp-meta-label">Generated</span>
+              <span class="rp-meta-value" id="reportGenDate">—</span>
+            </div>
+            <button class="rp-export-btn" onclick="window.print()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9V2h12v7" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Print Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Hero KPI Row -->
+        <div class="rp-metrics">
+          <div class="rp-metric rp-metric--revenue">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Total Revenue</span>
+              <div class="rp-metric-value" id="reportRevenue">LKR 0</div>
+              <div class="rp-metric-caption">All bookings combined</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--bookings">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Total Bookings</span>
+              <div class="rp-metric-value" id="reportBookings">0</div>
+              <div class="rp-metric-caption">Reservations recorded</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--nights">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Nights Sold</span>
+              <div class="rp-metric-value" id="reportNights">0</div>
+              <div class="rp-metric-caption">Avg <span id="reportAvgStay">0</span> nights/stay</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--avg">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Avg Bill / Booking</span>
+              <div class="rp-metric-value" id="reportAvgBill">LKR 0</div>
+              <div class="rp-metric-caption" id="reportTopGuestLine">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="rp-charts-row">
+
+          <!-- Room Type Card -->
+          <div class="rp-chart-card">
+            <div class="rp-chart-header">
+              <div>
+                <h3 class="rp-chart-title">Revenue by Room Type</h3>
+                <p class="rp-chart-sub">Contribution to total revenue</p>
+              </div>
+              <div class="rp-chart-total" id="reportRoomTotal">LKR 0</div>
+            </div>
+            <!-- Donut Chart -->
+            <div class="rp-donut-wrap">
+              <svg class="rp-donut" viewBox="0 0 120 120" id="donutSvg">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#f1f5f9" stroke-width="16" />
+              </svg>
+              <div class="rp-donut-center">
+                <span class="rp-donut-label">Total</span>
+                <span class="rp-donut-val" id="donutTotal">0</span>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="rp-legend" id="reportRoomLegend"></div>
+          </div>
+
+          <!-- Board Plan Card -->
+          <div class="rp-chart-card rp-chart-card--wide">
+            <div class="rp-chart-header">
+              <div>
+                <h3 class="rp-chart-title">Revenue by Board Plan</h3>
+                <p class="rp-chart-sub">Meal plan breakdown</p>
+              </div>
+              <div class="rp-chart-total" id="reportBoardTotal">LKR 0</div>
+            </div>
+            <div class="rp-bars" id="reportBoardBreakdown"></div>
+          </div>
+
+        </div>
+
+        <!-- Recent Reservations Table -->
+        <div class="rp-table-card">
+          <div class="rp-chart-header">
+            <div>
+              <h3 class="rp-chart-title">Recent Reservations</h3>
+              <p class="rp-chart-sub">Latest booking activity</p>
+            </div>
+            <span class="rp-tag" id="reportTotalTag">0 total</span>
+          </div>
+          <div class="rp-table-wrap">
+            <table class="rp-table">
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Guest</th>
+                  <th>Room / Plan</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody">
+                <tr>
+                  <td colspan="6" class="rp-empty">No data</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Guest Banner -->
+        <div class="rp-top-guest" id="reportTopGuestCard" style="display:none;">
+          <div class="rp-top-guest-icon">⭐</div>
+          <div>
+            <div class="rp-top-guest-label">TOP SPENDING GUEST</div>
+            <div class="rp-top-guest-name" id="reportTopGuest">—</div>
+          </div>
+          <div class="rp-top-guest-amount" id="reportTopGuestSpend"></div>
+        </div>
+
+      </div>
+      <script src="app.js"></script>
 </body>
 
 </html>

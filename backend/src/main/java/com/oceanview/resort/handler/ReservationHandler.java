@@ -103,10 +103,81 @@ public class ReservationHandler implements HttpHandler {
 
     private void handleGetStats(HttpExchange exchange) throws IOException {
         List<Reservation> all = service.getAll();
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalBookings", all.size());
-        stats.put("totalRevenue", service.calculateTotalRevenue());
-        stats.put("occupancyRate", "85%"); // Mocked for demonstration
+        double totalRevenue = service.calculateTotalRevenue();
+
+        // Revenue & count by room type
+        Map<String, Double> revenueByRoom = new java.util.LinkedHashMap<>();
+        Map<String, Integer> countByRoom = new java.util.LinkedHashMap<>();
+        for (Reservation.RoomType rt : Reservation.RoomType.values()) {
+            revenueByRoom.put(rt.name(), 0.0);
+            countByRoom.put(rt.name(), 0);
+        }
+        // Revenue & count by board type
+        Map<String, Double> revenueByBoard = new java.util.LinkedHashMap<>();
+        Map<String, Integer> countByBoard = new java.util.LinkedHashMap<>();
+        for (Reservation.BoardType bt : Reservation.BoardType.values()) {
+            revenueByBoard.put(bt.name(), 0.0);
+            countByBoard.put(bt.name(), 0);
+        }
+
+        long totalNights = 0;
+        Map<String, Double> guestSpend = new java.util.LinkedHashMap<>();
+
+        for (Reservation r : all) {
+            // Room
+            if (r.getRoomType() != null) {
+                String rk = r.getRoomType().name();
+                revenueByRoom.put(rk,
+                        revenueByRoom.getOrDefault(rk, 0.0) + (r.getTotalBill() != null ? r.getTotalBill() : 0.0));
+                countByRoom.put(rk, countByRoom.getOrDefault(rk, 0) + 1);
+            }
+            // Board
+            if (r.getBoardType() != null) {
+                String bk = r.getBoardType().name();
+                revenueByBoard.put(bk,
+                        revenueByBoard.getOrDefault(bk, 0.0) + (r.getTotalBill() != null ? r.getTotalBill() : 0.0));
+                countByBoard.put(bk, countByBoard.getOrDefault(bk, 0) + 1);
+            }
+            // Nights
+            if (r.getCheckInDate() != null && r.getCheckOutDate() != null) {
+                long nights = java.time.temporal.ChronoUnit.DAYS.between(r.getCheckInDate(), r.getCheckOutDate());
+                totalNights += nights;
+            }
+            // Guest spend
+            if (r.getGuestName() != null) {
+                String g = r.getGuestName();
+                guestSpend.put(g,
+                        guestSpend.getOrDefault(g, 0.0) + (r.getTotalBill() != null ? r.getTotalBill() : 0.0));
+            }
+        }
+
+        int count = all.size();
+        double avgStay = count > 0 ? (double) totalNights / count : 0.0;
+        double avgBill = count > 0 ? totalRevenue / count : 0.0;
+
+        // Top guest
+        String topGuest = "";
+        double topSpend = 0.0;
+        for (Map.Entry<String, Double> e : guestSpend.entrySet()) {
+            if (e.getValue() > topSpend) {
+                topSpend = e.getValue();
+                topGuest = e.getKey();
+            }
+        }
+
+        // Build response
+        Map<String, Object> stats = new java.util.LinkedHashMap<>();
+        stats.put("totalBookings", count);
+        stats.put("totalRevenue", totalRevenue);
+        stats.put("totalNights", totalNights);
+        stats.put("avgStayNights", Math.round(avgStay * 10.0) / 10.0);
+        stats.put("avgBill", Math.round(avgBill));
+        stats.put("topGuest", topGuest);
+        stats.put("topGuestSpend", Math.round(topSpend));
+        stats.put("revenueByRoom", revenueByRoom);
+        stats.put("countByRoom", countByRoom);
+        stats.put("revenueByBoard", revenueByBoard);
+        stats.put("countByBoard", countByBoard);
 
         String json = JsonUtil.toJson(stats);
         sendResponse(exchange, 200, json);
@@ -115,7 +186,7 @@ public class ReservationHandler implements HttpHandler {
     private void addCorsHeaders(HttpExchange exchange) {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Role");
     }
 
     private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {

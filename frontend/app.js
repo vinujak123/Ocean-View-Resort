@@ -371,17 +371,171 @@ function displayInvoice(bill) {
 async function fetchReportData() {
     const role = localStorage.getItem('oceanview_role');
     try {
-        const response = await fetch(`${API_BASE}/stats`, {
-            headers: { 'X-Role': role }
-        });
-        if (response.ok) {
-            const stats = await response.json();
-            document.getElementById('reportRevenue').textContent = `LKR ${stats.totalRevenue.toLocaleString()}`;
-            document.getElementById('reportBookings').textContent = stats.totalBookings;
-            document.getElementById('reportOccupancy').textContent = stats.occupancyRate;
+        const [statsRes, reservationsRes] = await Promise.all([
+            fetch(`${API_BASE}/stats`, { headers: { 'X-Role': role } }),
+            fetch(API_BASE)
+        ]);
+        if (!statsRes.ok) return;
+        const stats = await statsRes.json();
+        const reservations = reservationsRes.ok ? await reservationsRes.json() : [];
+
+        const fmt = n => `LKR ${Number(n).toLocaleString()}`;
+        const totalRevenue = stats.totalRevenue || 0;
+        const totalBookings = stats.totalBookings || 0;
+
+        // ── Hero metrics ─────────────────────────────────
+        document.getElementById('reportRevenue').textContent = fmt(totalRevenue);
+        document.getElementById('reportBookings').textContent = totalBookings;
+        document.getElementById('reportNights').textContent = stats.totalNights || 0;
+        document.getElementById('reportAvgStay').textContent = stats.avgStayNights || 0;
+        document.getElementById('reportAvgBill').textContent = fmt(stats.avgBill || 0);
+        document.getElementById('reportGenDate').textContent =
+            new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+            + ' · ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('reportTotalTag').textContent = `${totalBookings} reservation${totalBookings !== 1 ? 's' : ''}`;
+
+        // Top guest caption under avg bill metric
+        if (stats.topGuest) {
+            document.getElementById('reportTopGuestLine').textContent = `Top guest: ${stats.topGuest}`;
         }
+
+        // ── Room type — DONUT ────────────────────────────
+        const revenueByRoom = stats.revenueByRoom || {};
+        const countByRoom = stats.countByRoom || {};
+        const roomColors = { STANDARD: '#2563eb', DELUXE: '#7c3aed', SUITE: '#0891b2' };
+        const roomLabels = { STANDARD: 'Standard', DELUXE: 'Deluxe', SUITE: 'Suite' };
+
+        document.getElementById('reportRoomTotal').textContent = fmt(totalRevenue);
+        document.getElementById('donutTotal').textContent = totalBookings;
+
+        // Build SVG donut arcs
+        const donutSvg = document.getElementById('donutSvg');
+        // keep the base circle (first child), remove arcs
+        while (donutSvg.children.length > 1) donutSvg.removeChild(donutSvg.lastChild);
+
+        const R = 48, CX = 60, CY = 60;
+        const circumference = 2 * Math.PI * R;
+        let offset = 0;
+        const roomKeys = Object.keys(revenueByRoom);
+
+        roomKeys.forEach(key => {
+            const rev = revenueByRoom[key] || 0;
+            const pct = totalRevenue > 0 ? rev / totalRevenue : 0;
+            const dashLen = pct * circumference;
+            if (dashLen === 0) return;
+            const arc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            arc.setAttribute('cx', CX);
+            arc.setAttribute('cy', CY);
+            arc.setAttribute('r', R);
+            arc.setAttribute('fill', 'none');
+            arc.setAttribute('stroke', roomColors[key] || '#94a3b8');
+            arc.setAttribute('stroke-width', '16');
+            arc.setAttribute('stroke-dasharray', `${dashLen} ${circumference - dashLen}`);
+            arc.setAttribute('stroke-dashoffset', -offset);
+            arc.setAttribute('transform', `rotate(-90 ${CX} ${CY})`);
+            arc.style.transition = 'stroke-dasharray 0.8s ease';
+            donutSvg.appendChild(arc);
+            offset += dashLen;
+        });
+
+        // Legend
+        const legendEl = document.getElementById('reportRoomLegend');
+        legendEl.innerHTML = '';
+        roomKeys.forEach(key => {
+            const rev = revenueByRoom[key] || 0;
+            const cnt = countByRoom[key] || 0;
+            const pct = totalRevenue > 0 ? Math.round((rev / totalRevenue) * 100) : 0;
+            legendEl.innerHTML += `
+              <div class="rp-legend-item">
+                <span class="rp-legend-dot" style="background:${roomColors[key] || '#94a3b8'}"></span>
+                <div class="rp-legend-body">
+                  <span class="rp-legend-name">${roomLabels[key] || key}</span>
+                  <span class="rp-legend-cnt">${cnt} booking${cnt !== 1 ? 's' : ''} · ${pct}%</span>
+                </div>
+                <span class="rp-legend-rev">${fmt(rev)}</span>
+              </div>`;
+        });
+
+        // ── Board plan — HORIZONTAL BARS ─────────────────
+        const revenueByBoard = stats.revenueByBoard || {};
+        const countByBoard = stats.countByBoard || {};
+        const boardColors = { BB: '#059669', HB: '#d97706', FB: '#e11d48' };
+        const boardLabels = { BB: 'Bed & Breakfast', HB: 'Half Board', FB: 'Full Board' };
+
+        document.getElementById('reportBoardTotal').textContent = fmt(totalRevenue);
+        const boardEl = document.getElementById('reportBoardBreakdown');
+        boardEl.innerHTML = '';
+
+        const maxBoardRev = Math.max(...Object.values(revenueByBoard));
+        Object.keys(revenueByBoard).forEach(key => {
+            const rev = revenueByBoard[key] || 0;
+            const cnt = countByBoard[key] || 0;
+            const pct = totalRevenue > 0 ? Math.round((rev / totalRevenue) * 100) : 0;
+            const barW = maxBoardRev > 0 ? Math.round((rev / maxBoardRev) * 100) : 0;
+            boardEl.innerHTML += `
+              <div class="rp-bar-row">
+                <div class="rp-bar-meta">
+                  <span class="rp-bar-label">${boardLabels[key] || key}</span>
+                  <span class="rp-bar-count">${cnt} booking${cnt !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="rp-bar-track">
+                  <div class="rp-bar-fill" style="width:${barW}%;background:${boardColors[key] || '#64748b'}"></div>
+                </div>
+                <div class="rp-bar-stats">
+                  <span class="rp-bar-pct">${pct}%</span>
+                  <span class="rp-bar-rev">${fmt(rev)}</span>
+                </div>
+              </div>`;
+        });
+
+        // ── Recent Reservations Table ─────────────────────
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+        if (reservations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="rp-empty">No reservations found</td></tr>';
+        } else {
+            [...reservations].reverse().slice(0, 10).forEach(r => {
+                const roomLabel = roomLabels[r.roomType] || r.roomType || '—';
+                const boardLabel = boardLabels[r.boardType] || r.boardType || '—';
+                tbody.innerHTML += `
+                  <tr>
+                    <td class="rp-td-ref">#${r.referenceId}</td>
+                    <td class="rp-td-guest">${r.guestName || '—'}</td>
+                    <td>
+                      <span class="rp-room-badge">${roomLabel}</span>
+                      <span class="rp-board-badge">${boardLabel}</span>
+                    </td>
+                    <td class="rp-td-date">${r.checkInDate || '—'}</td>
+                    <td class="rp-td-date">${r.checkOutDate || '—'}</td>
+                    <td class="rp-td-amt">${fmt(r.totalBill || 0)}</td>
+                  </tr>`;
+            });
+        }
+
+        // ── Top Guest Banner ──────────────────────────────
+        const guestCard = document.getElementById('reportTopGuestCard');
+        if (stats.topGuest) {
+            document.getElementById('reportTopGuest').textContent = stats.topGuest;
+            document.getElementById('reportTopGuestSpend').textContent = fmt(stats.topGuestSpend || 0);
+            guestCard.style.display = 'flex';
+        } else {
+            guestCard.style.display = 'none';
+        }
+
     } catch (e) { console.error('Error fetching report:', e); }
 }
+
+// Initialize login state
+if (localStorage.getItem('oceanview_logged_in') === 'true') {
+    showMainApp();
+}
+
+
+// Initialize login state
+if (localStorage.getItem('oceanview_logged_in') === 'true') {
+    showMainApp();
+}
+
 
 // Initialize login state
 if (localStorage.getItem('oceanview_logged_in') === 'true') {
