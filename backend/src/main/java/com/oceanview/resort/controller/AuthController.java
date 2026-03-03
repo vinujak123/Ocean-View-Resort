@@ -1,4 +1,4 @@
-package com.oceanview.resort.handler;
+package com.oceanview.resort.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -11,11 +11,11 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public class AuthHandler implements HttpHandler {
+public class AuthController implements HttpHandler {
     private final UserRepository userRepository;
     private final Gson gson = new Gson();
 
-    public AuthHandler(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -59,6 +59,7 @@ public class AuthHandler implements HttpHandler {
                 return;
             }
 
+            @SuppressWarnings("deprecation")
             JsonObject loginData = gson.fromJson(body, JsonObject.class);
 
             if (loginData == null) {

@@ -1,4 +1,4 @@
-package com.oceanview.resort.handler;
+package com.oceanview.resort.controller;
 
 import com.google.gson.Gson;
 import com.oceanview.resort.model.User;
@@ -10,11 +10,11 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class UserHandler implements HttpHandler {
+public class UserController implements HttpHandler {
     private final UserRepository userRepository;
     private final Gson gson = new Gson();
 
-    public UserHandler(UserRepository userRepository) {
+    public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

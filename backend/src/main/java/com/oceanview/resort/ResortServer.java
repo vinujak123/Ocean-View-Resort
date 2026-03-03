@@ -1,6 +1,6 @@
 package com.oceanview.resort;
 
-import com.oceanview.resort.handler.*;
+import com.oceanview.resort.controller.*;
 import com.oceanview.resort.repository.*;
 import com.oceanview.resort.service.ReservationService;
 import com.oceanview.resort.util.DatabaseUtil;
@@ -46,12 +46,12 @@ public class ResortServer {
             server = HttpServer.create(new InetSocketAddress(PORT), 0);
             server.setExecutor(Executors.newFixedThreadPool(10));
 
-            // Register handlers
-            server.createContext("/api/reservations", new ReservationHandler(reservationService));
-            server.createContext("/api/auth", new AuthHandler(userRepository));
-            server.createContext("/api/users", new UserHandler(userRepository));
-            server.createContext("/swagger-ui", new SwaggerHandler());
-            server.createContext("/api-docs", new SwaggerHandler());
+            // Register handlers (now Controllers)
+            server.createContext("/api/reservations", new ReservationController(reservationService));
+            server.createContext("/api/auth", new AuthController(userRepository));
+            server.createContext("/api/users", new UserController(userRepository));
+            server.createContext("/swagger-ui", new SwaggerController());
+            server.createContext("/api-docs", new SwaggerController());
 
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

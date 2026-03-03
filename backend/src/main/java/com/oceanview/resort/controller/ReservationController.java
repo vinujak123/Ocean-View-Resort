@@ -1,4 +1,4 @@
-package com.oceanview.resort.handler;
+package com.oceanview.resort.controller;
 
 import com.google.gson.JsonSyntaxException;
 import com.oceanview.resort.model.Reservation;
@@ -17,11 +17,11 @@ import java.util.Map;
 /**
  * HTTP handler for Reservation API endpoints
  */
-public class ReservationHandler implements HttpHandler {
+public class ReservationController implements HttpHandler {
 
     private final ReservationService service;
 
-    public ReservationHandler(ReservationService service) {
+    public ReservationController(ReservationService service) {
         this.service = service;
     }
 

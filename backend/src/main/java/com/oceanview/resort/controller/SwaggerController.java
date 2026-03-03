@@ -1,10 +1,9 @@
-package com.oceanview.resort.handler;
+package com.oceanview.resort.controller;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,7 +13,7 @@ import java.nio.file.Paths;
 /**
  * HTTP handler for serving Swagger UI and OpenAPI specification
  */
-public class SwaggerHandler implements HttpHandler {
+public class SwaggerController implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
