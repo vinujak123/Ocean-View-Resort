@@ -54,4 +54,20 @@ public class ValidationUtil {
             errors.add(fieldName + " is required");
         }
     }
+
+    /**
+     * Validate email format
+     */
+    public static void validateEmail(String email, String fieldName, List<String> errors) {
+        if (isBlank(email)) {
+            errors.add(fieldName + " is required");
+            return;
+        }
+
+        // Simple regex for email validation
+        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        if (!email.matches(emailRegex)) {
+            errors.add(fieldName + " is invalid");
+        }
+    }
 }
