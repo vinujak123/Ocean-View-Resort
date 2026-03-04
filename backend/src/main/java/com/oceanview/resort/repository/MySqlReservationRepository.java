@@ -22,7 +22,7 @@ public class MySqlReservationRepository implements ReservationRepository {
                 list.add(mapResultSetToReservation(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error fetching all reservations", e);
         }
         return list;
     }
@@ -57,7 +57,7 @@ public class MySqlReservationRepository implements ReservationRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error inserting reservation", e);
         }
         return res;
     }
@@ -78,7 +78,7 @@ public class MySqlReservationRepository implements ReservationRepository {
             pstmt.setLong(10, res.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error updating reservation", e);
         }
         return res;
     }
@@ -95,7 +95,7 @@ public class MySqlReservationRepository implements ReservationRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error finding reservation by reference ID: " + referenceId, e);
         }
         return Optional.empty();
     }
@@ -111,7 +111,7 @@ public class MySqlReservationRepository implements ReservationRepository {
                 return max;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error finding max reference ID", e);
         }
         return null;
     }
@@ -128,7 +128,7 @@ public class MySqlReservationRepository implements ReservationRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error finding reservation by ID: " + id, e);
         }
         return Optional.empty();
     }
@@ -141,7 +141,7 @@ public class MySqlReservationRepository implements ReservationRepository {
             pstmt.setString(1, referenceId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error deleting reservation by reference ID: " + referenceId, e);
         }
     }
 

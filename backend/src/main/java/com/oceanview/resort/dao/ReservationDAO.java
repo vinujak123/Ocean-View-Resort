@@ -1,8 +1,10 @@
 package com.oceanview.resort.dao;
 
 import com.oceanview.resort.model.Reservation;
+import com.oceanview.resort.repository.FileBasedReservationRepository;
 import com.oceanview.resort.repository.MySqlReservationRepository;
 import com.oceanview.resort.repository.ReservationRepository;
+import com.oceanview.resort.util.DatabaseUtil;
 
 /**
  * Data Access Object for Reservations.
@@ -12,7 +14,13 @@ public class ReservationDAO {
     private final ReservationRepository repository;
 
     public ReservationDAO() {
-        this.repository = new MySqlReservationRepository();
+        // Match the persistence logic from ResortServer
+        String persistence = System.getProperty("persistence", "auto");
+        if (!"file".equalsIgnoreCase(persistence) && DatabaseUtil.testConnection()) {
+            this.repository = new MySqlReservationRepository();
+        } else {
+            this.repository = new FileBasedReservationRepository();
+        }
     }
 
     public boolean createReservation(Reservation res) {
@@ -20,8 +28,7 @@ public class ReservationDAO {
             repository.save(res);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Error creating reservation via DAO", e);
         }
     }
 }

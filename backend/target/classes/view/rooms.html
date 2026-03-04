@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Rooms | Ocean View Resort</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
+    <style>
+        .rooms-hero {
+            height: 60vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('resort_hero.webp') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .rooms-grid {
+            padding: 80px 8%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+        }
+
+        .room-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .room-showcase:nth-child(even) {
+            direction: rtl;
+        }
+
+        .room-showcase:nth-child(even) .room-content {
+            direction: ltr;
+        }
+
+        .room-image {
+            width: 100%;
+            height: 450px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .room-content h3 {
+            font-size: 36px;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .room-price {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .room-description {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .amenities-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .amenities-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+        }
+    </style>
+</head>
+
+<body>
+    <nav style="background: rgba(26, 42, 68, 0.9);">
+        <div class="logo">OCEAN VIEW</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="rooms.html" style="color: var(--primary);">Rooms</a>
+            <a href="index.html#amenities">Amenities</a>
+            <a href="admin.html">Staff Login</a>
+        </div>
+        <a href="booking.html" class="btn-book">BOOK NOW</a>
+    </nav>
+
+    <header class="rooms-hero">
+        <h1>Our Accommodations</h1>
+        <p>Luxury redefined in every detail.</p>
+    </header>
+
+    <div class="rooms-grid">
+        <!-- Standard Room -->
+        <div class="room-showcase">
+            <div class="room-image"
+                style="background-image: url('https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=1074');">
+            </div>
+            <div class="room-content">
+                <h3>Standard Room</h3>
+                <span class="room-price">From LKR 15,000 / Night</span>
+                <p class="room-description">Elegant and cozy, our Standard Rooms offer the perfect blend of comfort and
+                    style. Ideal for short stays or solo travelers seeking a peaceful retreat.</p>
+                <ul class="amenities-list">
+                    <li>✨ King Size Bed</li>
+                    <li>🚿 Rain Shower</li>
+                    <li>📶 Free High-speed WiFi</li>
+                    <li>📺 42" Smart TV</li>
+                    <li>🧴 Premium Toiletries</li>
+                    <li>☕ Coffee/Tea Maker</li>
+                </ul>
+                <a href="booking.html" class="btn-book">Reserve This Room</a>
+            </div>
+        </div>
+
+        <!-- Deluxe Room -->
+        <div class="room-showcase">
+            <div class="room-image"
+                style="background-image: url('https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1074');">
+            </div>
+            <div class="room-content">
+                <h3>Deluxe Room</h3>
+                <span class="room-price">From LKR 25,000 / Night</span>
+                <p class="room-description">Elevate your stay in our Deluxe Rooms. Featuring more space and a private
+                    balcony overlooking the lush resort gardens.</p>
+                <ul class="amenities-list">
+                    <li>🌅 Private Balcony</li>
+                    <li>🛁 Luxury Bathtub</li>
+                    <li>🧺 Daily Turn-down Service</li>
+                    <li>🍹 Mini Bar</li>
+                    <li>👔 Ironing Facilities</li>
+                    <li>🛋️ Large Lounge Area</li>
+                </ul>
+                <a href="booking.html" class="btn-book">Reserve This Room</a>
+            </div>
+        </div>
+
+        <!-- Suite -->
+        <div class="room-showcase">
+            <div class="room-image"
+                style="background-image: url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1074');">
+            </div>
+            <div class="room-content">
+                <h3>Executive Suite</h3>
+                <span class="room-price">From LKR 45,000 / Night</span>
+                <p class="room-description">The pinnacle of luxury. Our Executive Suites offer expansive living areas,
+                    direct ocean views, and exclusive access to the VIP lounge.</p>
+                <ul class="amenities-list">
+                    <li>🌊 Full Ocean View</li>
+                    <li>🛋️ Separate Living Room</li>
+                    <li>🥂 VIP Lounge Access</li>
+                    <li>🍳 In-room Breakfast</li>
+                    <li>🛁 Jacuzzi</li>
+                    <li>🤵 Personalized Butler Service</li>
+                </ul>
+                <a href="booking.html" class="btn-book">Reserve This Suite</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="logo" style="margin-bottom: 20px; color: #c5a059;">OCEAN VIEW RESORT</div>
+        <p>&copy; 2026 Ocean View Resort Galle. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

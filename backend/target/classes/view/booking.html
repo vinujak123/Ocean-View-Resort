@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Stay | Ocean View Resort</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
+    <style>
+        .booking-container {
+            max-width: 800px;
+            margin: 120px auto 60px;
+            background: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary);
+        }
+
+        input,
+        select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .estimate-box {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .estimate-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: var(--white);
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+
+<body style="background-color: #fff9f0;">
+    <nav style="background: var(--secondary);">
+        <div class="logo">OCEAN VIEW</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="rooms.html">Rooms</a>
+        </div>
+    </nav>
+
+    <div class="booking-container">
+        <h2 style="margin-bottom: 30px; text-align: center;">Reserve Your Paradise</h2>
+        <form id="publicBookingForm">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="guestName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" placeholder="e.g. +94 77 123 4567" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" id="address" placeholder="Cities and Country">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Room Category</label>
+                    <select id="roomType">
+                        <option value="STANDARD">Standard (LKR 15,000)</option>
+                        <option value="DELUXE">Deluxe (LKR 25,000)</option>
+                        <option value="SUITE">Suite (LKR 45,000)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dining Plan</label>
+                    <select id="boardType">
+                        <option value="BB">Bed & Breakfast (Included)</option>
+                        <option value="HB">Half Board (+ LKR 5,000)</option>
+                        <option value="FB">Full Board (+ LKR 10,000)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Arrival Date</label>
+                    <input type="date" id="checkInDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Departure Date</label>
+                    <input type="date" id="checkOutDate" required>
+                </div>
+            </div>
+
+            <div id="estimateBox" class="estimate-box" style="display: none;">
+                <span style="font-weight: 600;">Estimated Total:</span>
+                <span id="estimateAmount" class="estimate-amount">LKR 0</span>
+            </div>
+
+            <button type="submit" class="btn-submit">CONFIRM BOOKING</button>
+        </form>
+    </div>
+
+    <script src="booking.js"></script>
+</body>
+
+</html>

@@ -13,7 +13,7 @@ public class ReservationDAOTest {
         Reservation res = new Reservation();
 
         // Setup reservation details as shown in Slide 17 pattern
-        res.setReferenceId("203");
+        res.setReferenceId("ref-" + System.currentTimeMillis());
         res.setGuestName("Test Guest");
         res.setAddress("123 Galle Road, Galle");
         res.setPhone("0771234567");

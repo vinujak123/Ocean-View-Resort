@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ocean View Resort - Management System</title>
+  <link rel="stylesheet" href="styles.css?v=1.1">
+</head>
+
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon">OV</div>
+        <h1>OCEAN VIEW</h1>
+        <p>Resort Management Portal</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <div id="loginError" class="error-message" style="display: none;"></div>
+        <button type="submit" class="btn-primary">SIGN IN</button>
+      </form>
+      <div class="demo-credentials">
+        Systems Key: <strong>admin / admin123</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="mainApp" class="app-container" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo"></div>
+        <h1>OCEAN VIEW</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-page="add">
+          <span>New Booking</span>
+        </button>
+        <button class="nav-item" data-page="list">
+          <span>Reservations</span>
+        </button>
+        <button class="nav-item" data-page="billing">
+          <span>Payments</span>
+        </button>
+        <button class="nav-item admin-only" data-page="staff" style="display: none;">
+          <span>Staff Management</span>
+        </button>
+        <button class="nav-item admin-only" data-page="reports" style="display: none;">
+          <span>Financials</span>
+        </button>
+        <button class="nav-item" data-page="help">
+          <span>Help Center</span>
+        </button>
+        <button class="nav-item" id="exitBtn" style="margin-top: auto; color: #ef4444;">
+          <span>Exit System</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" id="logoutBtn">
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="content-header">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Welcome back to the management portal.</p>
+        </div>
+        <div class="user-info">
+          <div class="user-avatar" id="avatarLetter">A</div>
+          <span id="usernameDisplay">Administrator</span>
+        </div>
+      </header>
+
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Bookings</span>
+            <div class="stat-value" id="totalBookings">0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Revenue</span>
+            <div class="stat-value" id="totalRevenue">LKR 0</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Occupancy</span>
+            <div class="stat-value" id="occupancyRate">0%</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Active Guests</span>
+            <div class="stat-value">28</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Reservation Page -->
+      <div id="addPage" class="page-content" style="display: none;">
+        <div class="form-container">
+          <form id="reservationForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Guest Name</label>
+                <input type="text" id="guestName" required>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="phone" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" id="address">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Room Type</label>
+                <select id="roomType">
+                  <option value="STANDARD">Standard (LKR 15,000)</option>
+                  <option value="DELUXE">Deluxe (LKR 25,000)</option>
+                  <option value="SUITE">Suite (LKR 45,000)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Board Type</label>
+                <select id="boardType">
+                  <option value="BB">Bed & Breakfast (Free)</option>
+                  <option value="HB">Half Board (+5,000)</option>
+                  <option value="FB">Full Board (+10,000)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Check In</label>
+                <input type="date" id="checkInDate" required>
+              </div>
+              <div class="form-group">
+                <label>Check Out</label>
+                <input type="date" id="checkOutDate" required>
+              </div>
+            </div>
+            <div id="estimateBox" class="estimate-box" style="display: none;">
+              <span>Estimated Total Price:</span>
+              <span id="estimateAmount" class="estimate-amount">LKR 0</span>
+            </div>
+            <button type="submit" class="btn-primary">CONFIRM RESERVATION</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- List Page -->
+      <div id="listPage" class="page-content" style="display: none;">
+        <div class="table-container">
+          <table id="reservationsTable">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Guest</th>
+                <th>Plan</th>
+                <th>Stay Dates</th>
+                <th>Total Bill</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reservationsBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Billing Page -->
+      <div id="billingPage" class="page-content" style="display: none;">
+        <div class="billing-grid">
+          <div class="billing-search">
+            <h3>Billing Search</h3>
+            <div class="form-group">
+              <label>Enter Reference ID</label>
+              <input type="text" id="searchRefId" placeholder="e.g. 1001">
+            </div>
+            <button class="btn-secondary" id="generateInvoiceBtn">GENERATE INVOICE</button>
+          </div>
+          <div id="invoiceContainer" style="display: none;">
+            <div class="invoice">
+              <div class="invoice-header">
+                <h1>OCEAN VIEW RESORT</h1>
+                <p>Official Invoice</p>
+              </div>
+              <div class="invoice-details" id="invoiceDetails">
+                <!-- Populated by JavaScript -->
+              </div>
+              <button class="btn-print" onclick="window.print()">Print Hard Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Management Page (Admin Only) -->
+      <div id="staffPage" class="page-content admin-only" style="display: none;">
+        <div class="form-container" style="margin-bottom: 30px;">
+          <h3>Add New Staff Member</h3>
+          <form id="staffForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="newStaffUsername" required>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="newStaffPassword" required>
+              </div>
+              <div class="form-group">
+                <label>Role</label>
+                <select id="newStaffRole">
+                  <option value="STAFF">Staff</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">CREATE ACCOUNT</button>
+          </form>
+        </div>
+        <div class="table-container">
+          <h3>Active Staff List</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reports Page (Admin Only) -->
+      <div id="reportsPage" class="page-content admin-only rp-page" style="display: none;">
+
+        <!-- Report Banner -->
+        <div class="rp-banner">
+          <div class="rp-banner-left">
+            <div class="rp-banner-eyebrow">FINANCIAL ANALYTICS</div>
+            <h2 class="rp-banner-title">Revenue &amp; Performance Report</h2>
+            <p class="rp-banner-sub">Ocean View Resort &mdash; All-time summary</p>
+          </div>
+          <div class="rp-banner-right">
+            <div class="rp-banner-meta">
+              <span class="rp-meta-label">Generated</span>
+              <span class="rp-meta-value" id="reportGenDate">—</span>
+            </div>
+            <button class="rp-export-btn" onclick="window.print()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9V2h12v7" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Print Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Hero KPI Row -->
+        <div class="rp-metrics">
+          <div class="rp-metric rp-metric--revenue">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Total Revenue</span>
+              <div class="rp-metric-value" id="reportRevenue">LKR 0</div>
+              <div class="rp-metric-caption">All bookings combined</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--bookings">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Total Bookings</span>
+              <div class="rp-metric-value" id="reportBookings">0</div>
+              <div class="rp-metric-caption">Reservations recorded</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--nights">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Nights Sold</span>
+              <div class="rp-metric-value" id="reportNights">0</div>
+              <div class="rp-metric-caption">Avg <span id="reportAvgStay">0</span> nights/stay</div>
+            </div>
+          </div>
+          <div class="rp-metric rp-metric--avg">
+            <div class="rp-metric-bg"></div>
+            <div class="rp-metric-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </div>
+            <div class="rp-metric-body">
+              <span class="rp-metric-label">Avg Bill / Booking</span>
+              <div class="rp-metric-value" id="reportAvgBill">LKR 0</div>
+              <div class="rp-metric-caption" id="reportTopGuestLine">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="rp-charts-row">
+
+          <!-- Room Type Card -->
+          <div class="rp-chart-card">
+            <div class="rp-chart-header">
+              <div>
+                <h3 class="rp-chart-title">Revenue by Room Type</h3>
+                <p class="rp-chart-sub">Contribution to total revenue</p>
+              </div>
+              <div class="rp-chart-total" id="reportRoomTotal">LKR 0</div>
+            </div>
+            <!-- Donut Chart -->
+            <div class="rp-donut-wrap">
+              <svg class="rp-donut" viewBox="0 0 120 120" id="donutSvg">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#f1f5f9" stroke-width="16" />
+              </svg>
+              <div class="rp-donut-center">
+                <span class="rp-donut-label">Total</span>
+                <span class="rp-donut-val" id="donutTotal">0</span>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="rp-legend" id="reportRoomLegend"></div>
+          </div>
+
+          <!-- Board Plan Card -->
+          <div class="rp-chart-card rp-chart-card--wide">
+            <div class="rp-chart-header">
+              <div>
+                <h3 class="rp-chart-title">Revenue by Board Plan</h3>
+                <p class="rp-chart-sub">Meal plan breakdown</p>
+              </div>
+              <div class="rp-chart-total" id="reportBoardTotal">LKR 0</div>
+            </div>
+            <div class="rp-bars" id="reportBoardBreakdown"></div>
+          </div>
+
+        </div>
+
+        <!-- Recent Reservations Table -->
+        <div class="rp-table-card">
+          <div class="rp-chart-header">
+            <div>
+              <h3 class="rp-chart-title">Recent Reservations</h3>
+              <p class="rp-chart-sub">Latest booking activity</p>
+            </div>
+            <span class="rp-tag" id="reportTotalTag">0 total</span>
+          </div>
+          <div class="rp-table-wrap">
+            <table class="rp-table">
+              <thead>
+                <tr>
+                  <th>Ref #</th>
+                  <th>Guest</th>
+                  <th>Room / Plan</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody">
+                <tr>
+                  <td colspan="6" class="rp-empty">No data</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Guest Banner -->
+        <div class="rp-top-guest" id="reportTopGuestCard" style="display:none;">
+          <div class="rp-top-guest-icon">⭐</div>
+          <div>
+            <div class="rp-top-guest-label">TOP SPENDING GUEST</div>
+            <div class="rp-top-guest-name" id="reportTopGuest">—</div>
+          </div>
+          <div class="rp-top-guest-amount" id="reportTopGuestSpend"></div>
+        </div>
+
+      </div>
+
+      <!-- Help Page -->
+      <div id="helpPage" class="page-content" style="display: none;">
+        <div class="help-container">
+          <div class="help-section">
+            <h3 class="help-title">Getting Started</h3>
+            <p>Welcome to the Ocean View Resort Management System. This portal is designed for efficient handling of
+              room
+              reservations and guest records.</p>
+          </div>
+
+          <div class="help-grid">
+            <div class="help-card">
+              <div class="help-icon">📝</div>
+              <h4>New Bookings</h4>
+              <p>Navigate to "New Booking" to register a guest. Fill in their name, contact details, and stay dates. The
+                system
+                automatically calculates the bill based on room and board types.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">📅</div>
+              <h4>Reservations</h4>
+              <p>View all current and past bookings in the "Reservations" tab. You can see guest details, stay periods,
+                and total
+                costs at a glance.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">💳</div>
+              <h4>Payments & Invoices</h4>
+              <p>To generate a bill, go to "Payments", search by Reference ID, and click "Generate Invoice". You can
+                print a hard
+                copy directly from the browser.</p>
+            </div>
+            <div class="help-card">
+              <div class="help-icon">📊</div>
+              <h4>Analytics (Admins Only)</h4>
+              <p>Admins can access "Financials" for detailed revenue reports, occupancy rates, and guest spending
+                analysis.</p>
+            </div>
+          </div>
+
+          <div class="help-footer">
+            <p>Need technical assistance? Contact IT Support at <a
+                href="mailto:support@oceanview.com">support@oceanview.com</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Reservation Modal -->
+      <div id="editModal" class="exit-overlay" style="display: none;">
+        <div class="form-container" style="max-width: 600px; position: relative;">
+          <button class="btn-close" id="closeEditModal"
+            style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);">×</button>
+          <h3>Edit Reservation <span id="editRefId" style="color: var(--primary);"></span></h3>
+          <form id="editReservationForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Guest Name</label>
+                <input type="text" id="editGuestName" required>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="editPhone" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" id="editAddress">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Room Type</label>
+                <select id="editRoomType">
+                  <option value="STANDARD">Standard (LKR 15,000)</option>
+                  <option value="DELUXE">Deluxe (LKR 25,000)</option>
+                  <option value="SUITE">Suite (LKR 45,000)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Board Type</label>
+                <select id="editBoardType">
+                  <option value="BB">Bed & Breakfast (Free)</option>
+                  <option value="HB">Half Board (+5,000)</option>
+                  <option value="FB">Full Board (+10,000)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Check In</label>
+                <input type="date" id="editCheckInDate" required>
+              </div>
+              <div class="form-group">
+                <label>Check Out</label>
+                <input type="date" id="editCheckOutDate" required>
+              </div>
+            </div>
+            <div id="editEstimateBox" class="estimate-box">
+              <span>Updated Estimated Total:</span>
+              <span id="editEstimateAmount" class="estimate-amount">LKR 0</span>
+            </div>
+            <button type="submit" class="btn-primary">UPDATE RESERVATION</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Exit Screen Overlay -->
+      <div id="exitOverlay" class="exit-overlay" style="display: none;">
+        <div class="exit-card">
+          <div class="exit-icon">👋</div>
+          <h2>System Exit</h2>
+          <p>You are about to close the management system session. Are you sure you want to proceed?</p>
+          <div class="exit-actions">
+            <button class="btn-secondary" id="cancelExit">Cancel</button>
+            <button class="btn-primary" id="confirmExit" style="background: #ef4444;">Exit System</button>
+          </div>
+        </div>
+      </div>
+
+      <script src="app.js"></script>
+</body>
+
+</html>
