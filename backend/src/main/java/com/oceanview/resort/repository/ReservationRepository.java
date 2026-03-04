@@ -12,4 +12,8 @@ public interface ReservationRepository {
     Optional<Reservation> findByReferenceId(String referenceId);
 
     String findMaxReferenceId();
+
+    Optional<Reservation> findById(Long id);
+
+    void deleteByReferenceId(String referenceId);
 }

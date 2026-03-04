@@ -58,6 +58,10 @@ public class ReservationController implements HttpHandler {
                 String refId = path.substring("/api/reservations/".length());
                 if ("GET".equals(method)) {
                     handleGetByRefId(exchange, refId);
+                } else if ("PUT".equals(method)) {
+                    handleUpdate(exchange, refId);
+                } else if ("DELETE".equals(method)) {
+                    handleDelete(exchange, refId);
                 } else {
                     sendResponse(exchange, 405, "{\"message\":\"Method not allowed\"}");
                 }
@@ -98,6 +102,30 @@ public class ReservationController implements HttpHandler {
             sendResponse(exchange, 200, json);
         } else {
             sendResponse(exchange, 404, "{\"message\":\"Reservation not found\"}");
+        }
+    }
+
+    private void handleUpdate(HttpExchange exchange, String refId) throws IOException {
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            Reservation reservation = JsonUtil.fromJson(requestBody, Reservation.class);
+
+            Reservation updated = service.update(refId, reservation);
+            String json = JsonUtil.toJson(updated);
+            sendResponse(exchange, 200, json);
+        } catch (JsonSyntaxException e) {
+            sendResponse(exchange, 400, "{\"message\":\"Invalid JSON format\"}");
+        } catch (Exception e) {
+            sendResponse(exchange, 400, "{\"message\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    private void handleDelete(HttpExchange exchange, String refId) throws IOException {
+        try {
+            service.delete(refId);
+            sendResponse(exchange, 200, "{\"message\":\"Reservation deleted successfully\"}");
+        } catch (Exception e) {
+            sendResponse(exchange, 400, "{\"message\":\"" + e.getMessage() + "\"}");
         }
     }
 

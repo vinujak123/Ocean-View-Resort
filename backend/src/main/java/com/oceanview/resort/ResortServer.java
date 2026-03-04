@@ -26,8 +26,10 @@ public class ResortServer {
             UserRepository userRepository;
 
             // Try MySQL Connection
-            System.out.println("Checking MySQL connection...");
-            if (DatabaseUtil.testConnection()) {
+            String persistence = System.getProperty("persistence", "auto");
+            System.out.println("Persistence mode: " + persistence);
+
+            if (!"file".equalsIgnoreCase(persistence) && DatabaseUtil.testConnection()) {
                 System.out.println("Using MySQL persistence.");
                 reservationRepository = new MySqlReservationRepository();
                 userRepository = new MySqlUserRepository();
@@ -35,7 +37,7 @@ public class ResortServer {
                 // Migrate existing data if needed
                 migrateData(reservationRepository, userRepository);
             } else {
-                System.out.println("MySQL unavailable. Falling back to File-based persistence.");
+                System.out.println("Using File-based persistence.");
                 reservationRepository = new FileBasedReservationRepository();
                 userRepository = new FileUserRepository();
             }

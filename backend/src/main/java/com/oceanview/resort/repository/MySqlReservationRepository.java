@@ -116,6 +116,35 @@ public class MySqlReservationRepository implements ReservationRepository {
         return null;
     }
 
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        String sql = "SELECT * FROM reservations WHERE id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToReservation(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void deleteByReferenceId(String referenceId) {
+        String sql = "DELETE FROM reservations WHERE reference_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, referenceId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Reservation mapResultSetToReservation(ResultSet rs) throws SQLException {
         Reservation r = new Reservation();
         r.setId(rs.getLong("id"));

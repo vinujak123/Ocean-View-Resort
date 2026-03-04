@@ -1,21 +1,9 @@
 [
   {
-    "id": 1,
-    "referenceId": "1001",
-    "guestName": "John Doe",
-    "address": "123 Main St",
-    "phone": "1234567890",
-    "roomType": "DELUXE",
-    "boardType": "FB",
-    "checkInDate": "2026-03-01",
-    "checkOutDate": "2026-03-05",
-    "totalBill": 140000.0
-  },
-  {
     "id": 2,
     "referenceId": "1002",
     "guestName": "ygyu",
-    "address": "ygtyg",
+    "address": "ygtygh",
     "phone": "054684684",
     "roomType": "STANDARD",
     "boardType": "BB",
@@ -25,38 +13,14 @@
   },
   {
     "id": 1,
-    "referenceId": "1003",
-    "guestName": "aaasdada",
-    "address": "assadasd",
-    "phone": "05646486",
-    "roomType": "STANDARD",
-    "boardType": "BB",
-    "checkInDate": "2026-02-21",
-    "checkOutDate": "2026-02-23",
-    "totalBill": 30000.0
-  },
-  {
-    "id": 2,
-    "referenceId": "1004",
-    "guestName": "vvvv",
-    "address": "ijijiji",
-    "phone": "000062652",
-    "roomType": "STANDARD",
-    "boardType": "BB",
-    "checkInDate": "2026-02-21",
-    "checkOutDate": "2026-02-22",
-    "totalBill": 15000.0
-  },
-  {
-    "id": 1,
-    "referenceId": "1005",
-    "guestName": "vinuja",
-    "address": "piliyandala",
-    "phone": "0545454564",
-    "roomType": "SUITE",
-    "boardType": "FB",
-    "checkInDate": "2026-02-28",
-    "checkOutDate": "2026-03-04",
-    "totalBill": 220000.0
+    "referenceId": "1001",
+    "guestName": "vv",
+    "address": "Galle",
+    "phone": "0771234567",
+    "roomType": "DELUXE",
+    "boardType": "HB",
+    "checkInDate": "2026-03-03",
+    "checkOutDate": "2026-03-05",
+    "totalBill": 60000.0
   }
 ]

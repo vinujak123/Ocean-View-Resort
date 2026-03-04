@@ -61,4 +61,51 @@ public class ReservationService {
     public Double calculateTotalRevenue() {
         return getAll().stream().mapToDouble(Reservation::getTotalBill).sum();
     }
+
+    public void delete(String refId) throws Exception {
+        Reservation existing = getByRefId(refId);
+        if (existing == null) {
+            throw new Exception("Reservation not found");
+        }
+        repository.deleteByReferenceId(refId);
+    }
+
+    public Reservation update(String refId, Reservation updatedRes) throws Exception {
+        Reservation existing = getByRefId(refId);
+        if (existing == null) {
+            throw new Exception("Reservation not found");
+        }
+
+        // Validate updated data
+        List<String> errors = new ArrayList<>();
+        ValidationUtil.validateRequired(updatedRes.getGuestName(), "Guest name", errors);
+        ValidationUtil.validateRequired(updatedRes.getPhone(), "Phone number", errors);
+        ValidationUtil.validateRequired(updatedRes.getCheckInDate(), "Check-in date", errors);
+        ValidationUtil.validateRequired(updatedRes.getCheckOutDate(), "Check-out date", errors);
+
+        if (!errors.isEmpty()) {
+            throw new Exception(String.join(", ", errors));
+        }
+
+        if (updatedRes.getCheckOutDate().isBefore(updatedRes.getCheckInDate())
+                || updatedRes.getCheckOutDate().equals(updatedRes.getCheckInDate())) {
+            throw new Exception("Check-out must be at least one day after Check-in");
+        }
+
+        // Update fields
+        existing.setGuestName(updatedRes.getGuestName());
+        existing.setAddress(updatedRes.getAddress());
+        existing.setPhone(updatedRes.getPhone());
+        existing.setRoomType(updatedRes.getRoomType());
+        existing.setBoardType(updatedRes.getBoardType());
+        existing.setCheckInDate(updatedRes.getCheckInDate());
+        existing.setCheckOutDate(updatedRes.getCheckOutDate());
+
+        // Re-calculate bill
+        long nights = ChronoUnit.DAYS.between(existing.getCheckInDate(), existing.getCheckOutDate());
+        double dailyRate = existing.getRoomType().rate + existing.getBoardType().rate;
+        existing.setTotalBill(nights * dailyRate);
+
+        return repository.save(existing);
+    }
 }

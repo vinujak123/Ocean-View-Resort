@@ -100,9 +100,6 @@ public class FileBasedReservationRepository implements ReservationRepository {
                 .findFirst();
     }
 
-    /**
-     * Find maximum reference ID for auto-increment
-     */
     @Override
     public String findMaxReferenceId() {
         return findAll().stream()
@@ -110,5 +107,34 @@ public class FileBasedReservationRepository implements ReservationRepository {
                 .filter(id -> id != null && id.matches("\\d+"))
                 .max(String::compareTo)
                 .orElse(null);
+    }
+
+    /**
+     * Find reservation by ID
+     */
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return findAll().stream()
+                .filter(r -> r.getId().equals(id))
+                .findFirst();
+    }
+
+    /**
+     * Delete reservation by reference ID
+     */
+    @Override
+    public synchronized void deleteByReferenceId(String referenceId) {
+        try {
+            List<Reservation> reservations = findAll();
+            boolean removed = reservations.removeIf(r -> r.getReferenceId().equals(referenceId));
+
+            if (removed) {
+                // Write back to file
+                String json = JsonUtil.toJson(reservations);
+                Files.writeString(dataPath, json);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete reservation", e);
+        }
     }
 }
