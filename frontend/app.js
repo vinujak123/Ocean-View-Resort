@@ -204,6 +204,12 @@ function updateReservationsList(reservations) {
             </td>
             <td style="color: #64748b; font-size: 14px;">${r.checkInDate} to ${r.checkOutDate}</td>
             <td><strong>LKR ${r.totalBill?.toLocaleString()}</strong></td>
+            <td>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-edit" onclick="openEditModal('${r.referenceId}')">Edit</button>
+                    <button class="btn-delete" onclick="deleteReservation('${r.referenceId}')">Delete</button>
+                </div>
+            </td>
         `;
         tbody.appendChild(row);
     });
@@ -249,6 +255,132 @@ roomTypeSelect.addEventListener('change', calculateEstimate);
 boardTypeSelect.addEventListener('change', calculateEstimate);
 checkInInput.addEventListener('change', calculateEstimate);
 checkOutInput.addEventListener('change', calculateEstimate);
+
+// Edit Modal Logic
+const editModal = document.getElementById('editModal');
+const closeEditModal = document.getElementById('closeEditModal');
+const editReservationForm = document.getElementById('editReservationForm');
+const editRoomTypeSelect = document.getElementById('editRoomType');
+const editBoardTypeSelect = document.getElementById('editBoardType');
+const editCheckInInput = document.getElementById('editCheckInDate');
+const editCheckOutInput = document.getElementById('editCheckOutDate');
+const editEstimateBox = document.getElementById('editEstimateBox');
+const editEstimateAmount = document.getElementById('editEstimateAmount');
+
+function calculateEditEstimate() {
+    const checkIn = editCheckInInput.value;
+    const checkOut = editCheckOutInput.value;
+
+    if (!checkIn || !checkOut) {
+        editEstimateBox.style.display = 'none';
+        return;
+    }
+
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    if (nights <= 0) {
+        editEstimateBox.style.display = 'none';
+        return;
+    }
+
+    const roomRates = { STANDARD: 15000, DELUXE: 25000, SUITE: 45000 };
+    const boardRates = { BB: 0, HB: 5000, FB: 10000 };
+
+    const total = nights * (roomRates[editRoomTypeSelect.value] + boardRates[editBoardTypeSelect.value]);
+
+    editEstimateAmount.textContent = `LKR ${total.toLocaleString()}`;
+    editEstimateBox.style.display = 'flex';
+}
+
+editRoomTypeSelect.addEventListener('change', calculateEditEstimate);
+editBoardTypeSelect.addEventListener('change', calculateEditEstimate);
+editCheckInInput.addEventListener('change', calculateEditEstimate);
+editCheckOutInput.addEventListener('change', calculateEditEstimate);
+
+window.openEditModal = async (refId) => {
+    try {
+        const response = await fetch(`${API_BASE}/${refId}`);
+        if (!response.ok) throw new Error('Failed to fetch reservation');
+        const r = await response.json();
+
+        document.getElementById('editRefId').textContent = `#${r.referenceId}`;
+        document.getElementById('editGuestName').value = r.guestName;
+        document.getElementById('editPhone').value = r.phone;
+        document.getElementById('editAddress').value = r.address || '';
+        editRoomTypeSelect.value = r.roomType;
+        editBoardTypeSelect.value = r.boardType;
+        editCheckInInput.value = r.checkInDate;
+        editCheckOutInput.value = r.checkOutDate;
+
+        calculateEditEstimate();
+        editModal.style.display = 'flex';
+    } catch (error) {
+        console.error('Error opening edit modal:', error);
+        alert('Error loading reservation details.');
+    }
+};
+
+closeEditModal.addEventListener('click', () => {
+    editModal.style.display = 'none';
+});
+
+editReservationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const refId = document.getElementById('editRefId').textContent.substring(1);
+
+    const formData = {
+        guestName: document.getElementById('editGuestName').value,
+        address: document.getElementById('editAddress').value,
+        phone: document.getElementById('editPhone').value,
+        roomType: editRoomTypeSelect.value,
+        boardType: editBoardTypeSelect.value,
+        checkInDate: editCheckInInput.value,
+        checkOutDate: editCheckOutInput.value
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/${refId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            alert('Reservation Updated Successfully!');
+            editModal.style.display = 'none';
+            fetchData();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.message || 'Failed to update reservation'}`);
+        }
+    } catch (error) {
+        console.error('Error updating reservation:', error);
+        alert('Error updating reservation. Please try again.');
+    }
+});
+
+window.deleteReservation = async (refId) => {
+    if (!confirm(`Are you sure you want to delete reservation #${refId}?`)) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/${refId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('Reservation Deleted Successfully!');
+            fetchData();
+        } else {
+            const error = await response.json();
+            alert(`Error: ${error.message || 'Failed to delete reservation'}`);
+        }
+    } catch (error) {
+        console.error('Error deleting reservation:', error);
+        alert('Error deleting reservation. Please try again.');
+    }
+};
 
 reservationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
