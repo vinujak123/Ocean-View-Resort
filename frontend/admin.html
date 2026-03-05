@@ -62,6 +62,9 @@
         <button class="nav-item admin-only" data-page="reports" style="display: none;">
           <span>Financials</span>
         </button>
+        <button class="nav-item admin-only" data-page="pricing" style="display: none;">
+          <span>Plans &amp; Pricing</span>
+        </button>
         <button class="nav-item" data-page="help">
           <span>Help Center</span>
         </button>
@@ -133,17 +136,13 @@
               <div class="form-group">
                 <label>Room Type</label>
                 <select id="roomType">
-                  <option value="STANDARD">Standard (LKR 15,000)</option>
-                  <option value="DELUXE">Deluxe (LKR 25,000)</option>
-                  <option value="SUITE">Suite (LKR 45,000)</option>
+                  <!-- Populated dynamically from /api/pricing -->
                 </select>
               </div>
               <div class="form-group">
                 <label>Board Type</label>
                 <select id="boardType">
-                  <option value="BB">Bed & Breakfast (Free)</option>
-                  <option value="HB">Half Board (+5,000)</option>
-                  <option value="FB">Full Board (+10,000)</option>
+                  <!-- Populated dynamically from /api/pricing -->
                 </select>
               </div>
             </div>
@@ -421,6 +420,59 @@
 
       </div>
 
+      <!-- Pricing Page (Admin Only) -->
+      <div id="pricingPage" class="page-content admin-only" style="display: none;">
+        <div class="form-container" style="margin-bottom: 30px;">
+          <h3>Update Room & Board Pricing</h3>
+          <form id="pricingForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Room Type</label>
+                <select id="pricingRoomType">
+                  <!-- Populated dynamically from /api/pricing -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Base Price (LKR)</label>
+                <input type="number" id="pricingRoomPrice" required min="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Board Type</label>
+                <select id="pricingBoardType">
+                  <option value="BB">Bed & Breakfast</option>
+                  <option value="HB">Half Board</option>
+                  <option value="FB">Full Board</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Additional Cost (LKR)</label>
+                <input type="number" id="pricingBoardCost" required min="0">
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">UPDATE PRICING</button>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <h3>Current Pricing Structure</h3>
+          <table id="currentPricingTable">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Price (LKR)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pricingTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Help Page -->
       <div id="helpPage" class="page-content" style="display: none;">
         <div class="help-container">
@@ -493,17 +545,13 @@
               <div class="form-group">
                 <label>Room Type</label>
                 <select id="editRoomType">
-                  <option value="STANDARD">Standard (LKR 15,000)</option>
-                  <option value="DELUXE">Deluxe (LKR 25,000)</option>
-                  <option value="SUITE">Suite (LKR 45,000)</option>
+                  <!-- Populated dynamically from /api/pricing -->
                 </select>
               </div>
               <div class="form-group">
                 <label>Board Type</label>
                 <select id="editBoardType">
-                  <option value="BB">Bed & Breakfast (Free)</option>
-                  <option value="HB">Half Board (+5,000)</option>
-                  <option value="FB">Full Board (+10,000)</option>
+                  <!-- Populated dynamically from /api/pricing -->
                 </select>
               </div>
             </div>

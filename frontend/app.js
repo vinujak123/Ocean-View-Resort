@@ -1,4 +1,5 @@
 const API_BASE = 'http://localhost:8081/api/reservations';
+const PRICING_API = 'http://localhost:8081/api/pricing';
 
 // Authentication
 const loginForm = document.getElementById('loginForm');
@@ -72,6 +73,7 @@ function showMainApp() {
     if (pages.dashboard) pages.dashboard.style.display = 'block';
 
     fetchData();
+    loadPricing(); // populate all dropdowns on app load
 }
 
 // Navigation
@@ -83,6 +85,7 @@ const pages = {
     billing: document.getElementById('billingPage'),
     staff: document.getElementById('staffPage'),
     reports: document.getElementById('reportsPage'),
+    pricing: document.getElementById('pricingPage'),
     help: document.getElementById('helpPage')
 };
 const pageTitle = document.getElementById('pageTitle');
@@ -117,6 +120,7 @@ navItems.forEach(item => {
             billing: 'Search records and generate official invoices.',
             staff: 'Manage system users and access levels.',
             reports: 'Detailed financial analytics and performance data.',
+            pricing: 'Manage room types, board plans, and seasonal offers.',
             help: 'Guidelines and documentation for system usage.'
         };
         document.getElementById('pageSubtitle').textContent = subtitles[page] || '';
@@ -125,6 +129,7 @@ navItems.forEach(item => {
         if (page === 'list') fetchReservations();
         if (page === 'staff') fetchStaffList();
         if (page === 'reports') fetchReportData();
+        if (page === 'pricing') fetchAndRenderPricing();
     });
 });
 
@@ -712,8 +717,135 @@ if (localStorage.getItem('oceanview_logged_in') === 'true') {
     showMainApp();
 }
 
+// ========================
+// Plans & Pricing Features
+// ========================
 
-// Initialize login state
-if (localStorage.getItem('oceanview_logged_in') === 'true') {
-    showMainApp();
+let currentPricingConfig = null;
+
+async function loadPricing() {
+    try {
+        currentPricingConfig = await fetch(PRICING_API).then(r => r.json());
+        populatePlanSelects(currentPricingConfig);
+    } catch (e) {
+        console.warn('Could not load pricing config, using fallback:', e);
+        // Fallback defaults
+        const fallback = {
+            roomPlans: [
+                { code: 'STANDARD', name: 'Standard', rate: 15000 },
+                { code: 'DELUXE', name: 'Deluxe', rate: 25000 },
+                { code: 'SUITE', name: 'Suite', rate: 45000 }
+            ],
+            boardPlans: [
+                { code: 'BB', name: 'Bed & Breakfast', rate: 0 },
+                { code: 'HB', name: 'Half Board', rate: 5000 },
+                { code: 'FB', name: 'Full Board', rate: 10000 }
+            ]
+        };
+        currentPricingConfig = fallback;
+        populatePlanSelects(fallback);
+    }
 }
+
+function populatePlanSelects(config) {
+    const roomSelects = ['roomType', 'editRoomType', 'pricingRoomType'];
+    const boardSelects = ['boardType', 'editBoardType'];
+
+    roomSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const current = el.value;
+        el.innerHTML = '';
+        (config.roomPlans || []).forEach(plan => {
+            const opt = document.createElement('option');
+            opt.value = plan.code;
+            opt.textContent = `${plan.name} (LKR ${plan.rate.toLocaleString()})`;
+            el.appendChild(opt);
+        });
+        if (current) el.value = current;
+    });
+
+    boardSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const current = el.value;
+        el.innerHTML = '';
+        (config.boardPlans || []).forEach(plan => {
+            const opt = document.createElement('option');
+            opt.value = plan.code;
+            opt.textContent = plan.rate > 0
+                ? `${plan.name} (+ LKR ${plan.rate.toLocaleString()})`
+                : `${plan.name} (Included)`;
+            el.appendChild(opt);
+        });
+        if (current) el.value = current;
+    });
+}
+
+async function fetchAndRenderPricing() {
+    await loadPricing();
+    const config = currentPricingConfig;
+    const tbody = document.getElementById('pricingTableBody');
+    if (!tbody || !config) return;
+
+    tbody.innerHTML = '';
+    (config.roomPlans || []).forEach(plan => {
+        tbody.innerHTML += `<tr>
+            <td><span class="badge">Room</span></td>
+            <td>${plan.name}</td>
+            <td>LKR ${plan.rate.toLocaleString()} / night</td>
+            <td><button class="btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="editPlanPrice('room','${plan.code}', ${plan.rate})">Edit Price</button></td>
+        </tr>`;
+    });
+    (config.boardPlans || []).forEach(plan => {
+        tbody.innerHTML += `<tr>
+            <td><span class="badge" style="background:#10b981">Board</span></td>
+            <td>${plan.name}</td>
+            <td>${plan.rate > 0 ? 'LKR ' + plan.rate.toLocaleString() + ' extra' : 'Included'}</td>
+            <td><button class="btn-secondary" style="padding:4px 12px;font-size:12px;" onclick="editPlanPrice('board','${plan.code}', ${plan.rate})">Edit Price</button></td>
+        </tr>`;
+    });
+}
+
+function editPlanPrice(type, code, currentRate) {
+    if (type === 'room') {
+        document.getElementById('pricingRoomType').value = code;
+        document.getElementById('pricingRoomPrice').value = currentRate;
+    } else {
+        document.getElementById('pricingBoardType').value = code;
+        document.getElementById('pricingBoardCost').value = currentRate;
+    }
+}
+
+document.getElementById('pricingForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentPricingConfig) return;
+
+    // Update the room rate in the config copy
+    const roomCode = document.getElementById('pricingRoomType').value;
+    const roomPrice = parseFloat(document.getElementById('pricingRoomPrice').value);
+    const boardCode = document.getElementById('pricingBoardType').value;
+    const boardCost = parseFloat(document.getElementById('pricingBoardCost').value);
+
+    const updatedConfig = JSON.parse(JSON.stringify(currentPricingConfig));
+    const roomPlan = updatedConfig.roomPlans.find(p => p.code === roomCode);
+    if (roomPlan) roomPlan.rate = roomPrice;
+    const boardPlan = updatedConfig.boardPlans.find(p => p.code === boardCode);
+    if (boardPlan) boardPlan.rate = boardCost;
+
+    try {
+        const resp = await fetch(PRICING_API, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedConfig)
+        });
+        if (resp.ok) {
+            alert('Pricing updated successfully!');
+            fetchAndRenderPricing();
+        } else {
+            alert('Failed to update pricing.');
+        }
+    } catch (err) {
+        alert('Server error: ' + err.message);
+    }
+});

@@ -1,7 +1,11 @@
 com\oceanview\resort\dao\RoomDAO.class
+com\oceanview\resort\controller\PricingController.class
 com\oceanview\resort\util\DatabaseUtil.class
 com\oceanview\resort\controller\ReservationController.class
 com\oceanview\resort\controller\SwaggerController.class
+com\oceanview\resort\model\PricingConfig.class
+com\oceanview\resort\repository\FilePricingRepository.class
+com\oceanview\resort\service\PricingService.class
 com\oceanview\resort\controller\AuthController.class
 com\oceanview\resort\model\Room.class
 com\oceanview\resort\repository\FileUserRepository.class
@@ -13,10 +17,13 @@ com\oceanview\resort\service\ReservationService.class
 com\oceanview\resort\repository\FileBasedReservationRepository$1.class
 com\oceanview\resort\util\JsonUtil.class
 com\oceanview\resort\model\User.class
+com\oceanview\resort\model\PricingConfig$Offer.class
 com\oceanview\resort\model\Reservation$RoomType.class
+com\oceanview\resort\repository\PricingRepository.class
 com\oceanview\resort\model\Reservation$BoardType.class
 com\oceanview\resort\ResortServer.class
 com\oceanview\resort\dao\ReservationDAO.class
+com\oceanview\resort\model\PricingConfig$Plan.class
 com\oceanview\resort\controller\UserController.class
 com\oceanview\resort\repository\ReservationRepository.class
 com\oceanview\resort\model\Reservation.class

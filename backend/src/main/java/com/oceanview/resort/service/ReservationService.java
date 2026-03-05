@@ -14,9 +14,11 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository repository;
+    private final PricingService pricingService;
 
-    public ReservationService(ReservationRepository repository) {
+    public ReservationService(ReservationRepository repository, PricingService pricingService) {
         this.repository = repository;
+        this.pricingService = pricingService;
     }
 
     public List<Reservation> getAll() {
@@ -46,9 +48,11 @@ public class ReservationService {
         int nextId = (maxId == null) ? 1001 : Integer.parseInt(maxId) + 1;
         res.setReferenceId(String.valueOf(nextId));
 
-        // Bill Calculation logic
+        // Bill Calculation logic using dynamic pricing
         long nights = ChronoUnit.DAYS.between(res.getCheckInDate(), res.getCheckOutDate());
-        double dailyRate = res.getRoomType().rate + res.getBoardType().rate;
+        String roomCode = res.getRoomType() != null ? res.getRoomType().name() : "STANDARD";
+        String boardCode = res.getBoardType() != null ? res.getBoardType().name() : "BB";
+        double dailyRate = pricingService.getRoomRate(roomCode) + pricingService.getBoardRate(boardCode);
         res.setTotalBill(nights * dailyRate);
 
         return repository.save(res);
@@ -101,9 +105,11 @@ public class ReservationService {
         existing.setCheckInDate(updatedRes.getCheckInDate());
         existing.setCheckOutDate(updatedRes.getCheckOutDate());
 
-        // Re-calculate bill
+        // Re-calculate bill using dynamic pricing
         long nights = ChronoUnit.DAYS.between(existing.getCheckInDate(), existing.getCheckOutDate());
-        double dailyRate = existing.getRoomType().rate + existing.getBoardType().rate;
+        String roomCode = existing.getRoomType() != null ? existing.getRoomType().name() : "STANDARD";
+        String boardCode = existing.getBoardType() != null ? existing.getBoardType().name() : "BB";
+        double dailyRate = pricingService.getRoomRate(roomCode) + pricingService.getBoardRate(boardCode);
         existing.setTotalBill(nights * dailyRate);
 
         return repository.save(existing);

@@ -2,6 +2,7 @@ package com.oceanview.resort;
 
 import com.oceanview.resort.controller.*;
 import com.oceanview.resort.repository.*;
+import com.oceanview.resort.service.PricingService;
 import com.oceanview.resort.service.ReservationService;
 import com.oceanview.resort.util.DatabaseUtil;
 import com.sun.net.httpserver.HttpServer;
@@ -25,6 +26,10 @@ public class ResortServer {
             ReservationRepository reservationRepository;
             UserRepository userRepository;
 
+            // Pricing config always uses file-based storage
+            FilePricingRepository pricingRepository = new FilePricingRepository("data/pricing.json");
+            PricingService pricingService = new PricingService(pricingRepository);
+
             // Try MySQL Connection
             String persistence = System.getProperty("persistence", "auto");
             System.out.println("Persistence mode: " + persistence);
@@ -42,7 +47,7 @@ public class ResortServer {
                 userRepository = new FileUserRepository();
             }
 
-            ReservationService reservationService = new ReservationService(reservationRepository);
+            ReservationService reservationService = new ReservationService(reservationRepository, pricingService);
 
             // Create HTTP server
             server = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -50,6 +55,7 @@ public class ResortServer {
 
             // Register handlers (now Controllers)
             server.createContext("/api/reservations", new ReservationController(reservationService));
+            server.createContext("/api/pricing", new PricingController(pricingService));
             server.createContext("/api/auth", new AuthController(userRepository));
             server.createContext("/api/users", new UserController(userRepository));
             server.createContext("/swagger-ui", new SwaggerController());

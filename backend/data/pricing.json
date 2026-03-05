@@ -1,0 +1,37 @@
+{
+  "roomPlans": [
+    {
+      "code": "STANDARD",
+      "name": "Standard",
+      "rate": 15000.0
+    },
+    {
+      "code": "DELUXE",
+      "name": "Deluxe",
+      "rate": 25000.0
+    },
+    {
+      "code": "SUITE",
+      "name": "Suite",
+      "rate": 45000.0
+    }
+  ],
+  "boardPlans": [
+    {
+      "code": "BB",
+      "name": "Bed \u0026 Breakfast",
+      "rate": 0.0
+    },
+    {
+      "code": "HB",
+      "name": "Half Board",
+      "rate": 5000.0
+    },
+    {
+      "code": "FB",
+      "name": "Full Board",
+      "rate": 10000.0
+    }
+  ],
+  "seasonalOffers": []
+}
